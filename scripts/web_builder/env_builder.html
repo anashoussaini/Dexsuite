@@ -1,0 +1,1235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>DexSuite Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <meta id="themeColor" name="theme-color" content="#0b0f1a" />
+
+  <!-- =============== 1) CORE (constants + pure logic; no DOM) =============== -->
+  <script defer>
+  // Namespaced core so you can lift this block as-is.
+  window.DSCore = (function () {
+    "use strict";
+
+    // ---------- Constants ----------
+    const ACCENT = "#30AFFE";
+
+    const MANIPULATORS = [
+      "franka", "franka_fr3", "gen3", "kuka", "link6", "lite6", "sawyer", "ur5", "ur10", "z1",
+      "floating",
+      "franka_with_gripper", "gen3_lite", "so_100", "trossen_wx250s", "trossen_vx300s", "aloha_tactile",
+    ];
+    const INTEGRATED = new Set([
+      "franka_with_gripper","gen3_lite","so_100","trossen_wx250s","trossen_vx300s","aloha_tactile"
+    ]);
+    const GRIPPERS = [
+      "ability","allegro","barrett","dclaw","franka_umi_tacticle","inspire","leap","robotiq","schunk","shadow","sharpa"
+    ];
+
+    // Same boxes as dexsuite/config/workspaces.yaml (base frame, metres).
+    const WORKSPACES = {
+      franka:{min:[0.15,-0.5,-0.1], max:[0.65,0.5,0.6]},
+      franka_fr3:{min:[0.15,-0.5,-0.1], max:[0.65,0.5,0.6]},
+      gen3:{min:[0.0,-0.65,-0.1], max:[0.65,0.65,0.55]},
+      kuka:{min:[0.08,-0.7,-0.1], max:[0.8,0.7,0.6]},
+      link6:{min:[0.08,-0.7,-0.1], max:[0.8,0.7,0.6]},
+      lite6:{min:[0.05,-0.3,-0.1], max:[0.35,0.3,0.3]},
+      sawyer:{min:[0.1,-0.65,-0.1], max:[0.8,0.65,0.6]},
+      ur5:{min:[0.08,-0.65,-0.1], max:[0.75,0.65,0.6]},
+      ur10:{min:[0.08,-0.7,-0.13], max:[0.8,0.7,0.57]},
+      z1:{min:[0.05,-0.425,-0.1], max:[0.5,0.425,0.5]},
+      floating:{min:[0.05,-0.6,-0.1], max:[0.8,0.6,0.7]},
+      franka_with_gripper:{min:[0.15,-0.5,-0.1], max:[0.65,0.5,0.6]},
+      gen3_lite:{min:[0.04,-0.4,-0.1], max:[0.5,0.4,0.6]},
+      so_100:{min:[0.08,-0.26,-0.1], max:[0.35,0.26,0.25]},
+      trossen_wx250s:{min:[0.05,-0.4,-0.1], max:[0.5,0.4,0.45]},
+      trossen_vx300s:{min:[0.02,-0.55,-0.1], max:[0.7,0.55,0.35]},
+      aloha_tactile:{min:[0.02,-0.55,-0.1], max:[0.7,0.55,0.35]},
+    };
+
+    const PRESET_CAMERAS = {
+      front:     {pos:[1.2, 0.0, 0.6],  lookat:[0.4, 0.0, 0.2], fov:55, res:[224,224]},
+      overhead:  {pos:[0.0, 0.0, 1.8],  lookat:[0.4, 0.0, 0.2], fov:55, res:[224,224]},
+      left_side: {pos:[1.2,-1.0, 0.6],  lookat:[0.4, 0.0, 0.2], fov:55, res:[224,224]},
+      right_side:{pos:[1.2, 1.0, 0.6],  lookat:[0.4, 0.0, 0.2], fov:55, res:[224,224]},
+    };
+
+    // ---------- Small helpers (pure) ----------
+    const degToRad = (deg) => (Number(deg) * Math.PI / 180.0);
+    const pyStr   = (s) => `"${String(s).replaceAll('"','\\"')}"`;
+    const pyBool  = (b) => (b ? "True" : "False");
+    const numFmt  = (n) => {
+      const v = Number(n);
+      if (Number.isNaN(v)) return "0.0";
+      return (Math.abs(v) < 1e-9 ? "0.0" : v.toFixed(6).replace(/\.?0+$/,""));
+    };
+    const pyTuple = (arr, mapper = (x)=>x) => `(${arr.map(mapper).join(", ")}${arr.length===1?",":""})`;
+    const trim2 = (x)=> Number(x).toFixed(2).replace(/\.?0+$/,'');
+    const vec = (v)=> `[${trim2(v[0])},${trim2(v[1])},${trim2(v[2])}]`;
+
+    function workspaceTipText(manip) {
+      const w = WORKSPACES[manip];
+      return w ? `Workspace AABB (base frame): min=${vec(w.min)} max=${vec(w.max)}` : "";
+    }
+
+    function computeGripperLock(manip, currentGripper) {
+      // Returns {disabled:boolean, value:string|null}
+      if (INTEGRATED.has(manip)) return { disabled: true, value: null }; // null => None in emitted code
+      const val = (currentGripper && currentGripper !== "None") ? currentGripper : "robotiq";
+      return { disabled: false, value: val };
+    }
+
+    // ---------- Pose emitters (pure) ----------
+    function emitPose({pos, ori}) {
+      const posStr = `pos=${pyTuple([numFmt(pos[0]), numFmt(pos[1]), numFmt(pos[2])])}`;
+      if (ori.mode === "quat") {
+        return `PoseOptions(${posStr}, yaw_rad=0.0, quat=${pyTuple(ori.quat.map(numFmt))})`;
+      }
+      const yaw = numFmt(degToRad(ori.yawDeg));
+      return `PoseOptions(${posStr}, yaw_rad=${yaw})`;
+    }
+
+    // ---------- Cameras (pure) ----------
+    // Accepts preset names (string) or custom defs:
+    // {type:'custom', name:'my_cam', pos:[x,y,z], lookat:[x,y,z], fov:55, h:224, w:224}
+    function emitCameras({ robotType, staticDefs, wrist, staticOverride, wristOverride, modalities }) {
+      const staticEntries = [];
+      if (staticDefs && staticDefs.length) {
+        for (const def of staticDefs) {
+          if (typeof def === "string") {
+            // Preset name
+            if (!staticOverride?.enabled) {
+              staticEntries.push(`${pyStr(def)}: ${pyStr(def)}`);
+            } else {
+              const p = PRESET_CAMERAS[def];
+              staticEntries.push(
+                `${pyStr(def)}: StaticCamOptions(pos=${pyTuple(p.pos)}, lookat=${pyTuple(p.lookat)}, fov=${numFmt(staticOverride.fov)}, res=${pyTuple([staticOverride.h, staticOverride.w])})`
+              );
+            }
+          } else if (def && typeof def === "object" && def.type === "custom") {
+            const fov = Number.isFinite(def.fov) ? numFmt(def.fov) : "55";
+            const h = Number.isFinite(def.h) ? def.h : 224;
+            const w = Number.isFinite(def.w) ? def.w : 224;
+            staticEntries.push(
+              `${pyStr(def.name)}: StaticCamOptions(pos=${pyTuple((def.pos||[1.2,0,0.6]).map(numFmt))}, lookat=${pyTuple((def.lookat||[0.4,0,0.2]).map(numFmt))}, fov=${fov}, res=${pyTuple([h,w])})`
+            );
+          }
+        }
+      }
+
+      const dynamicEntries = [];
+      if (wrist) {
+        if (robotType === "bimanual") {
+          if (wristOverride?.enabled) {
+            dynamicEntries.push(`"left_wrist": DynamicCamOptions(res=${pyTuple([wristOverride.h, wristOverride.w])})`);
+            dynamicEntries.push(`"right_wrist": DynamicCamOptions(res=${pyTuple([wristOverride.h, wristOverride.w])})`);
+          } else {
+            dynamicEntries.push(`"left_wrist": "wrist_cam"`);
+            dynamicEntries.push(`"right_wrist": "wrist_cam"`);
+          }
+        } else {
+          if (wristOverride?.enabled) {
+            dynamicEntries.push(`"wrist": DynamicCamOptions(res=${pyTuple([wristOverride.h, wristOverride.w])})`);
+          } else {
+            dynamicEntries.push(`"wrist": "wrist_cam"`);
+          }
+        }
+      }
+
+      // Fallback defaults if user selects nothing
+      if (staticEntries.length === 0 && dynamicEntries.length === 0) {
+        staticEntries.push(`"front": "front"`);
+        dynamicEntries.push(`"wrist": "wrist_cam"`);
+      }
+
+      const modalitiesStr = pyTuple((modalities?.length ? modalities : ["rgb"]).map(pyStr));
+
+      return [
+        `CamerasOptions(`,
+        `    static={ ${staticEntries.join(", ")} },`,
+        `    dynamic={ ${dynamicEntries.join(", ")} },`,
+        `    modalities=${modalitiesStr},`,
+        `)`,
+      ].join("\n");
+    }
+
+    // ---------- Robot (pure) ----------
+    function emitSingleRobot({ manip, gripper, manipCtrl, gripCtrl, poseSingle }) {
+      const gripCtrlLine = (gripper === null)
+        ? "None"
+        : `ControllerOptions(name=${pyStr(gripCtrl.name)}, config={"normalized": ${pyBool(gripCtrl.normalized)}})`;
+
+      return `RobotOptions(
+    type_of_robot="single",
+    single=ArmOptions(
+        manipulator=${pyStr(manip)},
+        gripper=${gripper===null ? "None" : pyStr(gripper)},
+        manipulator_controller=ControllerOptions(name=${pyStr(manipCtrl.name)}, config={"normalized": ${pyBool(manipCtrl.normalized)}}),
+        gripper_controller=${gripCtrlLine},
+    ),
+    layout=LayoutOptions(
+        single=${emitPose(poseSingle)}
+    ),
+)`;
+    }
+
+    function emitBiRobot({ left, right, sharedCtrls, layout }) {
+      const gripLeft  = (left.gripper  === null) ? "None" : `ControllerOptions(name=${pyStr(sharedCtrls.grip.name)}, config={"normalized": ${pyBool(sharedCtrls.grip.normalized)}})`;
+      const gripRight = (right.gripper === null) ? "None" : `ControllerOptions(name=${pyStr(sharedCtrls.grip.name)}, config={"normalized": ${pyBool(sharedCtrls.grip.normalized)}})`;
+
+      const layoutStr = (() => {
+        if (layout.preset === "custom") {
+          return `LayoutOptions(
+    preset=None,
+    left=${emitPose(layout.leftPose)},
+    right=${emitPose(layout.rightPose)},
+)`;
+        }
+        const lines = [`LayoutOptions(`, `    preset=${pyStr(layout.preset)},`];
+        if (layout.overrideLeft)  lines.push(`    left=${emitPose(layout.leftPose)},`);
+        if (layout.overrideRight) lines.push(`    right=${emitPose(layout.rightPose)},`);
+        lines.push(`)`);
+        return lines.join("\n");
+      })();
+
+      return `RobotOptions(
+    type_of_robot="bimanual",
+    left=ArmOptions(
+        manipulator=${pyStr(left.manip)},
+        gripper=${left.gripper===null ? "None" : pyStr(left.gripper)},
+        manipulator_controller=ControllerOptions(name=${pyStr(sharedCtrls.manip.name)}, config={"normalized": ${pyBool(sharedCtrls.manip.normalized)}}),
+        gripper_controller=${gripLeft},
+    ),
+    right=ArmOptions(
+        manipulator=${pyStr(right.manip)},
+        gripper=${right.gripper===null ? "None" : pyStr(right.gripper)},
+        manipulator_controller=ControllerOptions(name=${pyStr(sharedCtrls.manip.name)}, config={"normalized": ${pyBool(sharedCtrls.manip.normalized)}}),
+        gripper_controller=${gripRight},
+    ),
+    layout=${layoutStr.replace(/\n/g,"\n    ")},
+)`;
+    }
+
+    // ---------- Top-level code generator (pure) ----------
+    function generateDexSuiteCode(state) {
+      const sim = `SimOptions(control_hz=${Math.max(1, Number(state.env.control_hz||100))}, performance_mode=${pyBool(!!state.env.performance_mode)}, n_envs=${Math.max(1, Number(state.env.n_envs||1))})`;
+
+      const robotBlock = (state.robot.type === "single")
+        ? emitSingleRobot(state.robot.single)
+        : emitBiRobot(state.robot.bimanual);
+
+      const staticDefs = [
+        ...(state.cams.staticPresets || []),
+        ...(state.cams.staticCustom || []),
+      ];
+
+      const camerasBlock = emitCameras({
+        robotType: state.robot.type,
+        staticDefs,
+        wrist: !!state.cams.wrist,
+        staticOverride: state.cams.staticOverride,
+        wristOverride: state.cams.wristOverride,
+        modalities: state.cams.modalities || ["rgb"],
+      });
+
+      return `import dexsuite as ds
+from dexsuite.options import (
+    SimOptions,
+    RobotOptions, ArmOptions, ControllerOptions, LayoutOptions, PoseOptions,
+    CamerasOptions, StaticCamOptions, DynamicCamOptions,
+)
+
+env = ds.make(
+    ${pyStr(state.env.name || "stack")},
+    sim=${sim},
+    robot=${robotBlock.replace(/\n/g,"\n    ")},
+    cameras=${camerasBlock.replace(/\n/g,"\n    ")},
+    render_mode=${pyStr(state.env.render_mode || "human")},
+)
+
+obs, _ = env.reset()
+`;
+    }
+
+    // Expose the core
+    return {
+      ACCENT,
+      MANIPULATORS,
+      INTEGRATED,
+      GRIPPERS,
+      WORKSPACES,
+      PRESET_CAMERAS,
+
+      workspaceTipText,
+      computeGripperLock,
+      generateDexSuiteCode,
+    };
+  })();
+  </script>
+
+  <!-- =============== 2) UI (design + layout + glue) =============== -->
+  <style>
+    :root{
+      --accent:#30AFFE;
+
+      /* Dark */
+      --bg:#0b0f1a; --text:#f5f7fb; --muted:#8d97ab;
+      --panel:#121a2e; --surface:#0e1424; --border:#1f2a44; --input:#0c1323;
+
+      --code-bg:#0a0f1f; --code-border:#1b2742; --code-text:#eaf1ff;
+
+      --radius:14px;
+      --gap:18px;   /* between sections */
+      --gcol:14px;  /* grid column gap */
+
+      --s-1:6px; --s-2:10px; --s-3:14px; --s-4:18px; --s-5:22px;
+
+      --ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+      --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+
+      --tk-kw:#77c9ff; --tk-str:#baf3c3; --tk-num:#ffd791; --tk-comm:#8a94a9;
+      --shadow: 0 6px 22px rgba(0,0,0,.25), 0 1px 0 rgba(255,255,255,.03) inset;
+    }
+    :root[data-theme="light"]{
+      --bg:#ffffff; --text:#0f1221; --muted:#5e697a;
+      --panel:#ffffff; --surface:#f5f7fb; --border:#DCE6F7; --input:#eff4fc;
+
+      --code-bg:#f7fbff; --code-border:#CFE6FF; --code-text:#0e1b2c;
+
+      --tk-kw:#197dd9; --tk-str:#1a7f4e; --tk-num:#a56500; --tk-comm:#6e7b94;
+      --shadow: 0 6px 22px rgba(17, 41, 82, .08), 0 1px 0 rgba(17,41,82,.04) inset;
+    }
+
+    *{ box-sizing:border-box; min-width:0 }
+    html,body{ height:100% }
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font:15px/1.6 var(--ui);
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    }
+    button:disabled{ opacity:.65; cursor:not-allowed }
+    img,svg,video,canvas{ display:block; max-width:100% }
+
+    /* Layout */
+    .app{ max-width:1240px; margin:0 auto; padding:22px 18px }
+    .topbar{ display:flex; gap:10px; justify-content:flex-end; margin-bottom:var(--s-3) }
+    .icon-btn{ border:1.5px solid var(--border); background:transparent; color:var(--text);
+      border-radius:10px; padding:8px 10px; cursor:pointer; line-height:1 }
+
+    .layout{
+      display:grid;
+      grid-template-columns:0.85fr 1.15fr; /* code column favored a bit */
+      gap:18px;
+      align-items:start;
+    }
+    @media(max-width:980px){.layout{ grid-template-columns:1fr; }}
+
+    .left{ display:grid; gap:var(--gap) }
+
+    /* Cards */
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:18px 16px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card h3{ margin:0 0 var(--s-3) 0; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted) }
+    .card .card{ background:var(--surface); margin-top:var(--s-3); padding:14px; border-radius:12px; box-shadow:none }
+
+    /* Grids */
+    .row, .row3, .row4 { display:grid; gap:var(--gcol) }
+    .row  { grid-template-columns:repeat(2, minmax(0,1fr)) }
+    .row3 { grid-template-columns:repeat(3, minmax(0,1fr)) }
+    .row4 { grid-template-columns:repeat(4, minmax(0,1fr)) }
+    @media (max-width:900px){ .row, .row3, .row4 { grid-template-columns:1fr } }
+
+    /* Inputs & selects */
+    label{ display:block; margin:8px 0 8px; font-size:12px; color:var(--muted) }
+    input[type="text"], input[type="number"], select{
+      width:100%; height:42px; padding:8px 12px; border-radius:10px; border:1.5px solid var(--border);
+      background:var(--input); color:var(--text); outline:none; font-size:14px; line-height:1.2;
+    }
+    input[type=number]{ appearance:textfield }
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+
+    /* Pills + custom check indicators (NO native checkmark) */
+    .inline{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
+    .pill{
+      position:relative;
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px 8px 30px; /* left space for custom dot */
+      border-radius:999px; background:var(--surface);
+      border:1.5px solid var(--border); color:var(--muted); font-size:12px; line-height:1;
+      cursor:pointer;
+    }
+    /* hide native check/radio */
+    .pill input[type="checkbox"], .pill input[type="radio"]{
+      position:absolute; opacity:0; pointer-events:none; width:0; height:0;
+    }
+    /* custom dot/square */
+    .pill::before{
+      content:""; position:absolute; left:10px; top:50%; transform:translateY(-50%);
+      width:12px; height:12px; border-radius:50%; border:2px solid var(--border); background:transparent;
+    }
+    .pill:has(input[type="checkbox"])::before{ border-radius:3px; } /* square for checkboxes */
+    .pill:has(input:checked){
+      color:var(--text);
+      border-color:var(--accent);
+      background: rgba(48,175,254,.12);
+    }
+    .pill:has(input:checked)::before{
+      border-color:var(--accent);
+      background:var(--accent);
+    }
+
+    /* Switch – robust centering and exact travel */
+    .pill-switch .switch{ margin-left:8px }
+    .switch{
+      --sw-w: 44px; --sw-h: 24px; --sw-pad: 3px; --sw-knob: 18px;
+      position:relative; display:inline-block; width:var(--sw-w); height:var(--sw-h);
+      vertical-align:middle; line-height:0;
+    }
+    .switch input{
+      position:absolute; left:0; top:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer;
+    }
+    .slider{
+      position:absolute; inset:0; background:#2d354a; border-radius:calc(var(--sw-h));
+      transition: background .18s; pointer-events:none;
+    }
+    .slider:before{
+      content:""; position:absolute;
+      height: calc(var(--sw-h) - var(--sw-pad)*2);
+      width:  var(--sw-knob);
+      left:   var(--sw-pad);
+      top:    50%;
+      transform: translate(var(--knob-x, 0), -50%);
+      background:#fff; border-radius:50%; transition: transform .18s;
+    }
+    .switch input:checked + .slider{ background: var(--accent); }
+    .switch input:checked + .slider:before{
+      --knob-x: calc(var(--sw-w) - var(--sw-knob) - var(--sw-pad)*2); /* 44 - 18 - 6 = 20px */
+    }
+
+    /* details/summary ui */
+    details{ border:1px dashed var(--border); border-radius:12px; padding:12px; background:var(--surface); margin-top:var(--s-3) }
+    summary{ cursor:pointer; font-size:12px; color:var(--muted); list-style:none; outline:none; margin:-4px -4px 4px; padding:4px }
+    summary::-webkit-details-marker{ display:none }
+
+    /* Code panel */
+    .codeCard{ position:sticky; top:18px; height:fit-content }
+    .codeHead{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px }
+    .btn{ background:var(--accent); color:#041827; border:none; border-radius:10px; padding:10px 12px; font-weight:700; cursor:pointer; min-height:42px }
+    .btn.secondary{ background:transparent; color:var(--text); border:1.5px solid var(--border) }
+
+    pre#codeOut{
+      background:var(--code-bg); border:1.5px solid var(--code-border); color:var(--code-text);
+      border-radius:12px; padding:16px 18px; margin:0;
+      max-height:76vh; overflow:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6;
+      user-select:text; white-space:pre; /* PURE TEXT: no HTML spans */
+    }
+
+    #wristRes .pill{ padding:6px 10px 6px 30px }
+    :where(button, .icon-btn, input, select, summary, .btn):focus-visible{ outline:2px solid var(--accent); outline-offset:2px }
+
+    pre#codeOut::-webkit-scrollbar{ width:10px; height:10px }
+    pre#codeOut::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.12); border-radius:8px }
+    pre#codeOut::-webkit-scrollbar-track{ background:transparent }
+
+    .row + .row, .row3 + .row3, .row4 + .row4 { margin-top:var(--s-2) }
+    .row .inline, .row3 .inline, .row4 .inline { align-items:center }
+    #staticRows .row > div:last-child{ display:flex; align-items:flex-end; justify-content:flex-end }
+    .card * { margin-block-start: clamp(0px, var(--s-1), 10px); } .card *:first-child{ margin-block-start: 0 }
+
+    .status{ font-size:12px } .status.ok{ color:#76d394 } .status.warn{ color:#ffc97c } .status.error{ color:#ff8a8a } .muted{ color:var(--muted) }
+    .chev{ transition:transform .16s ease }
+    .collapsed .chev{ transform:rotate(-90deg) }
+    .collapsed .collapsible-body{ display:none }
+
+    /* Select arrow pinned to right edge */
+    select{
+      -webkit-appearance:none; -moz-appearance:none; appearance:none;
+      background-color: var(--input);
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%238d97ab" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+      background-repeat:no-repeat;
+      background-position: right 8px center;
+      background-size:14px 14px;
+      padding-right: 34px;
+    }
+    select:focus { border-color: var(--accent) }
+    select::-ms-expand{ display:none; }
+  </style>
+</head>
+
+<body>
+<div class="app">
+  <div class="topbar" role="toolbar" aria-label="Global controls">
+    <button id="themeBtn" class="icon-btn" title="Toggle theme">🌙</button>
+  </div>
+
+  <div class="layout">
+    <!-- LEFT -->
+    <div class="left">
+      <!-- SIMULATOR -->
+      <section class="card" aria-labelledby="simTitle">
+        <h3 id="simTitle">Simulator</h3>
+        <div class="row">
+          <div>
+            <label for="envName">environment</label>
+            <input id="envName" type="text" value="stack" placeholder="stack, bimanual_reach" autocomplete="off" spellcheck="false">
+          </div>
+          <div>
+            <label for="renderMode">render</label>
+            <select id="renderMode"><option>human</option><option>rgb_array</option></select>
+          </div>
+        </div>
+        <div class="row3" style="margin-top:6px">
+          <div><label for="controlHz">control_hz</label><input id="controlHz" type="number" min="1" step="1" value="100"></div>
+          <div><label for="nEnvs">n_envs</label><input id="nEnvs" type="number" min="1" step="1" value="1"></div>
+          <div class="inline" style="margin-top:26px">
+            <label class="pill pill-switch">
+              performance
+              <span class="switch">
+                <input id="performanceMode" type="checkbox">
+                <span class="slider"></span>
+              </span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- ROBOTS -->
+      <section class="card" aria-labelledby="robotTitle">
+        <h3 id="robotTitle">Robots</h3>
+        <div class="inline" style="margin-bottom:6px">
+          <label class="pill"><input type="radio" name="robotType" value="single" checked> Single</label>
+          <label class="pill"><input type="radio" name="robotType" value="bimanual"> Bimanual</label>
+        </div>
+
+        <!-- Single -->
+        <div id="singleBlock">
+          <div class="row">
+            <div>
+              <label for="singleManipulator">manipulator</label>
+              <select id="singleManipulator" title=""></select>
+            </div>
+            <div>
+              <label for="singleGripper">gripper</label>
+              <select id="singleGripper"></select>
+            </div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div>
+              <label for="singleManipCtrl">manipulator_controller</label>
+              <select id="singleManipCtrl">
+                <option>joint_position</option><option>joint_velocity</option><option>joint_torque</option>
+                <option>osc_pose</option><option>osc_pose_abs</option><option>ik_pose</option>
+              </select>
+              <div class="pill" style="margin-top:6px">normalized
+                <label class="switch">
+                  <input id="singleManipNormalized" type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label for="singleGripCtrl">gripper_controller</label>
+              <select id="singleGripCtrl">
+                <option>joint_position</option><option>joint_velocity</option><option>joint_torque</option>
+              </select>
+              <div class="pill" style="margin-top:6px">normalized
+                <label class="switch">
+                  <input id="singleGripNormalized" type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <details>
+            <summary>Pose</summary>
+            <div class="row3" style="margin-top:6px">
+              <div><label for="singlePosX">x</label><input id="singlePosX" type="number" step="0.01" value="0.0"></div>
+              <div><label for="singlePosY">y</label><input id="singlePosY" type="number" step="0.01" value="0.0"></div>
+              <div><label for="singlePosZ">z</label><input id="singlePosZ" type="number" step="0.01" value="0.0"></div>
+            </div>
+            <div class="inline" style="margin-top:6px">
+              <label class="pill"><input type="radio" name="singleOriMode" value="yaw" checked> yaw</label>
+              <label class="pill"><input type="radio" name="singleOriMode" value="quat"> quat</label>
+            </div>
+            <div id="singleYawRow" class="row" style="margin-top:6px">
+              <div><label for="singleYawDeg">yaw_deg</label><input id="singleYawDeg" type="number" step="0.01" value="0.0" min="-360" max="360"></div>
+            </div>
+            <div id="singleQuatRow" class="row4" style="display:none;margin-top:6px">
+              <div><label for="singleQuatW">w</label><input id="singleQuatW" type="number" step="0.000001" value="1.0"></div>
+              <div><label for="singleQuatX">x</label><input id="singleQuatX" type="number" step="0.000001" value="0.0"></div>
+              <div><label for="singleQuatY">y</label><input id="singleQuatY" type="number" step="0.000001" value="0.0"></div>
+              <div><label for="singleQuatZ">z</label><input id="singleQuatZ" type="number" step="0.000001" value="0.0"></div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Bimanual -->
+        <div id="bimanualBlock" style="display:none">
+          <div class="row">
+            <div>
+              <label for="leftManipulator">left.manipulator</label>
+              <select id="leftManipulator" title=""></select>
+            </div>
+            <div>
+              <label for="leftGripper">left.gripper</label>
+              <select id="leftGripper"></select>
+            </div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div>
+              <label for="rightManipulator">right.manipulator</label>
+              <select id="rightManipulator" title=""></select>
+            </div>
+            <div>
+              <label for="rightGripper">right.gripper</label>
+              <select id="rightGripper"></select>
+            </div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div>
+              <label for="biManipCtrl">manipulator_controller</label>
+              <select id="biManipCtrl">
+                <option>joint_position</option><option>joint_velocity</option><option>joint_torque</option>
+                <option>osc_pose</option><option>osc_pose_abs</option><option>ik_pose</option>
+              </select>
+              <div class="pill" style="margin-top:6px">normalized
+                <label class="switch">
+                  <input id="biManipNormalized" type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label for="biGripCtrl">gripper_controller</label>
+              <select id="biGripCtrl">
+                <option>joint_position</option><option>joint_velocity</option><option>joint_torque</option>
+              </select>
+              <div class="pill" style="margin-top:6px">normalized
+                <label class="switch">
+                  <input id="biGripNormalized" type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:6px">
+            <label for="layoutPreset">layout</label>
+            <select id="layoutPreset">
+              <option value="side_by_side">side_by_side</option>
+              <option value="right_angle">right_angle</option>
+              <option value="face_to_face">face_to_face</option>
+              <option value="custom">custom</option>
+            </select>
+
+            <details>
+              <summary>Overrides</summary>
+              <div class="inline" style="gap:10px;margin-top:6px">
+                <label class="pill"><input id="overrideLeft" type="checkbox"> left pose</label>
+                <label class="pill"><input id="overrideRight" type="checkbox"> right pose</label>
+              </div>
+
+              <div id="leftPoseBlock" style="display:none;margin-top:6px">
+                <div class="row3">
+                  <div><label for="leftPosX">left.x</label><input id="leftPosX" type="number" step="0.01" value="0.00"></div>
+                  <div><label for="leftPosY">left.y</label><input id="leftPosY" type="number" step="0.01" value="0.45"></div>
+                  <div><label for="leftPosZ">left.z</label><input id="leftPosZ" type="number" step="0.01" value="0.00"></div>
+                </div>
+                <div class="inline" style="margin-top:6px">
+                  <label class="pill"><input type="radio" name="leftOriMode" value="yaw" checked> yaw</label>
+                  <label class="pill"><input type="radio" name="leftOriMode" value="quat"> quat</label>
+                </div>
+                <div id="leftYawRow" class="row" style="margin-top:6px">
+                  <div><label for="leftYawDeg">left.yaw_deg</label><input id="leftYawDeg" type="number" step="0.01" value="90.0" min="-360" max="360"></div>
+                </div>
+                <div id="leftQuatRow" class="row4" style="display:none;margin-top:6px">
+                  <div><label for="leftQuatW">w</label><input id="leftQuatW" type="number" step="0.000001" value="1.0"></div>
+                  <div><label for="leftQuatX">x</label><input id="leftQuatX" type="number" step="0.000001" value="0.0"></div>
+                  <div><label for="leftQuatY">y</label><input id="leftQuatY" type="number" step="0.000001" value="0.0"></div>
+                  <div><label for="leftQuatZ">z</label><input id="leftQuatZ" type="number" step="0.000001" value="0.0"></div>
+                </div>
+              </div>
+
+              <div id="rightPoseBlock" style="display:none;margin-top:6px">
+                <div class="row3">
+                  <div><label for="rightPosX">right.x</label><input id="rightPosX" type="number" step="0.01" value="0.00"></div>
+                  <div><label for="rightPosY">right.y</label><input id="rightPosY" type="number" step="0.01" value="-0.45"></div>
+                  <div><label for="rightPosZ">right.z</label><input id="rightPosZ" type="number" step="0.01" value="0.00"></div>
+                </div>
+                <div class="inline" style="margin-top:6px">
+                  <label class="pill"><input type="radio" name="rightOriMode" value="yaw" checked> yaw</label>
+                  <label class="pill"><input type="radio" name="rightOriMode" value="quat"> quat</label>
+                </div>
+                <div id="rightYawRow" class="row" style="margin-top:6px">
+                  <div><label for="rightYawDeg">right.yaw_deg</label><input id="rightYawDeg" type="number" step="0.01" value="-90.0" min="-360" max="360"></div>
+                </div>
+                <div id="rightQuatRow" class="row4" style="display:none;margin-top:6px">
+                  <div><label for="rightQuatW">w</label><input id="rightQuatW" type="number" step="0.000001" value="1.0"></div>
+                  <div><label for="rightQuatX">x</label><input id="rightQuatX" type="number" step="0.000001" value="0.0"></div>
+                  <div><label for="rightQuatY">y</label><input id="rightQuatY" type="number" step="0.000001" value="0.0"></div>
+                  <div><label for="rightQuatZ">z</label><input id="rightQuatZ" type="number" step="0.000001" value="0.0"></div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- CAMERAS (collapsible) -->
+      <section id="camsCard" class="card" aria-labelledby="camTitle">
+        <div class="inline" style="justify-content:space-between;align-items:center">
+          <h3 id="camTitle" style="margin:0">Cameras</h3>
+          <button id="camCollapseBtn" class="icon-btn" aria-expanded="true" title="Collapse/expand cameras"><span class="chev">▾</span></button>
+        </div>
+        <div id="camsBody" class="collapsible-body">
+          <div class="inline" style="margin-bottom:8px">
+            <span class="pill" aria-hidden="true">modalities</span>
+            <label class="pill"><input class="modality" type="checkbox" value="rgb" checked> rgb</label>
+            <label class="pill"><input class="modality" type="checkbox" value="depth"> depth</label>
+            <label class="pill"><input class="modality" type="checkbox" value="segmentation"> segmentation</label>
+            <label class="pill"><input class="modality" type="checkbox" value="normal"> normal</label>
+          </div>
+
+          <!-- Static presets -->
+          <div class="card" style="background:var(--surface);">
+            <div class="inline" style="justify-content:space-between;align-items:center">
+              <strong>Static presets</strong>
+              <button id="addStatic" class="btn secondary" type="button">+ Add preset</button>
+            </div>
+            <div id="staticRows" style="display:grid;gap:10px;margin-top:8px"></div>
+            <div class="inline" style="margin-top:8px">
+              <label class="pill pill-switch"><input id="overrideStaticRes" type="checkbox"> static res/FOV</label>
+              <span class="pill">H <input id="staticH" type="number" min="16" step="1" value="224" style="width:84px" disabled></span>
+              <span class="pill">W <input id="staticW" type="number" min="16" step="1" value="224" style="width:84px" disabled></span>
+              <span class="pill">FOV <input id="staticFov" type="number" min="1" max="179" step="1" value="55" style="width:84px" disabled></span>
+            </div>
+          </div>
+
+          <!-- Custom static cameras -->
+          <div class="card" style="background:var(--surface);margin-top:8px">
+            <div class="inline" style="justify-content:space-between;align-items:center">
+              <strong>Custom static cams</strong>
+              <button id="addCustom" class="btn secondary" type="button">+ Add custom</button>
+            </div>
+            <div id="customRows" style="display:grid;gap:10px;margin-top:8px"></div>
+          </div>
+
+          <!-- Dynamic cameras -->
+          <div class="card" style="background:var(--surface);margin-top:8px">
+            <div class="inline" style="gap:12px;align-items:center">
+              <strong>Dynamic</strong>
+              <label class="pill"><input id="wristCam" type="checkbox" checked> wrist</label>
+              <label class="pill"><input id="overrideWristRes" type="checkbox"> wrist res</label>
+              <span class="inline" id="wristRes" style="display:none">
+                <span class="pill">H <input id="wristH" type="number" min="16" step="1" value="224" style="width:84px"></span>
+                <span class="pill">W <input id="wristW" type="number" min="16" step="1" value="224" style="width:84px"></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="inline" style="margin-top:10px;justify-content:space-between;align-items:center">
+            <div class="inline" style="gap:8px">
+              <button id="loadExample" class="btn secondary" type="button">Example (UR5×2)</button>
+              <button id="resetBtn" class="btn secondary" type="button">Reset</button>
+            </div>
+            <span id="validation" class="status muted" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- RIGHT: live code -->
+    <section class="card codeCard" aria-labelledby="codeTitle">
+      <div class="codeHead">
+        <h3 id="codeTitle" class="sr-only">Generated Python</h3>
+        <div style="height:1px"></div>
+        <div class="inline">
+          <button id="shareBtn" class="btn secondary" type="button">Share</button>
+          <button id="copyBtn" class="btn" type="button">Copy</button>
+          <button id="downloadBtn" class="btn secondary" type="button">Download</button>
+        </div>
+      </div>
+      <pre id="codeOut" aria-live="polite"></pre>
+      <div class="muted" style="margin-top:8px;font-size:12px">Tip: <kbd>Ctrl/Cmd</kbd>+<kbd>S</kbd> downloads, <kbd>Ctrl/Cmd</kbd>+<kbd>C</kbd> copies Python.</div>
+    </section>
+  </div>
+</div>
+
+<script>
+  const core = window.DSCore;
+  const $  = s=>document.querySelector(s);
+  const $$ = s=>Array.from(document.querySelectorAll(s));
+  const codeOut = $('#codeOut');
+  let currentCode = "";
+
+  // ---------- Theme ----------
+  const root = document.documentElement;
+  const themeBtn = $('#themeBtn');
+  const themeMeta = $('#themeColor');
+  function preferredTheme(){
+    return localStorage.getItem('ds_theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light':'dark');
+  }
+  function setTheme(next){
+    root.setAttribute('data-theme', next);
+    themeBtn.textContent = (next==='light') ? '☀️' : '🌙';
+    themeMeta?.setAttribute('content', next==='light' ? '#ffffff' : '#0b0f1a');
+    localStorage.setItem('ds_theme', next);
+  }
+  setTheme(preferredTheme());
+  themeBtn.addEventListener('click', ()=> setTheme(root.getAttribute('data-theme')==='light' ? 'dark':'light'));
+
+  // Always copy plain python
+  codeOut.addEventListener('copy', (e) => {
+    if (!currentCode) return;
+    e.preventDefault();
+    e.clipboardData.setData('text/plain', currentCode);
+  });
+
+  // Populate dropdowns
+  function fill(el, items){ el.innerHTML = items.map(v=>`<option value="${v}">${v}</option>`).join(''); }
+  fill($('#singleManipulator'), core.MANIPULATORS);
+  fill($('#leftManipulator'), core.MANIPULATORS);
+  fill($('#rightManipulator'), core.MANIPULATORS);
+  const gripList = ["None", ...core.GRIPPERS];
+  fill($('#singleGripper'), gripList);
+  fill($('#leftGripper'), gripList);
+  fill($('#rightGripper'), gripList);
+
+  // Enforce integrated; gripper controller lock
+  function enforce(manId, gripId, gripCtrlId){
+    const m = $(manId), g = $(gripId), gc = $(gripCtrlId);
+    if (!m || !g) return;
+    m.title = core.workspaceTipText(m.value);
+    const lock = core.computeGripperLock(m.value, g.value);
+    if (lock.disabled){ g.value='None'; g.disabled=true; if(gc) gc.disabled=true; }
+    else { g.disabled=false; if(g.value==='None') g.value = lock.value || 'robotiq'; if(gc) gc.disabled = (g.value==='None'); }
+  }
+
+  // Cameras: presets
+  const staticRows = $('#staticRows');
+  const STATIC_PRESETS = Object.keys(core.PRESET_CAMERAS || {front:1,overhead:1,left_side:1,right_side:1});
+  function makeStaticRow(initial='front'){
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `
+      <div>
+        <label>preset</label>
+        <select class="staticPreset" aria-label="Static camera preset">
+          ${STATIC_PRESETS.map(p=>`<option ${p===initial?'selected':''}>${p}</option>`).join('')}
+        </select>
+      </div>
+      <div class="inline" style="display:flex;align-items:flex-end;justify-content:flex-end">
+        <button class="btn secondary removeRow" type="button" aria-label="Remove static camera">Remove</button>
+      </div>`;
+    staticRows.appendChild(row);
+    row.querySelector('.removeRow').addEventListener('click', ()=>{ row.remove(); scheduleRender(); });
+    row.querySelector('.staticPreset').addEventListener('change', scheduleRender);
+  }
+  makeStaticRow('front');
+  $('#addStatic').addEventListener('click', ()=>{ makeStaticRow('overhead'); scheduleRender(); });
+
+  // Custom static cameras
+  const customRows = $('#customRows');
+  function makeCustomRow(data={}){
+    const id = Math.random().toString(36).slice(2,9);
+    const d = Object.assign({name:'cam_'+id, pos:[1.2,0,0.6], lookat:[0.4,0,0.2], fov:55, h:224, w:224}, data);
+    const row = document.createElement('div');
+    row.className = 'card';
+    row.innerHTML = `
+      <div class="row4">
+        <div><label>Name</label><input class="c_name" type="text" value="${d.name}" placeholder="e.g., desk_front"></div>
+        <div><label>FOV</label><input class="c_fov" type="number" step="1" min="1" max="179" value="${d.fov}"></div>
+        <div><label>H</label><input class="c_h" type="number" step="1" min="16" value="${d.h}"></div>
+        <div><label>W</label><input class="c_w" type="number" step="1" min="16" value="${d.w}"></div>
+      </div>
+      <div class="row3" style="margin-top:6px">
+        <div><label>pos.x</label><input class="c_px" type="number" step="0.01" value="${d.pos[0]}"></div>
+        <div><label>pos.y</label><input class="c_py" type="number" step="0.01" value="${d.pos[1]}"></div>
+        <div><label>pos.z</label><input class="c_pz" type="number" step="0.01" value="${d.pos[2]}"></div>
+      </div>
+      <div class="row3" style="margin-top:6px">
+        <div><label>lookat.x</label><input class="c_lx" type="number" step="0.01" value="${d.lookat[0]}"></div>
+        <div><label>lookat.y</label><input class="c_ly" type="number" step="0.01" value="${d.lookat[1]}"></div>
+        <div><label>lookat.z</label><input class="c_lz" type="number" step="0.01" value="${d.lookat[2]}"></div>
+      </div>
+      <div class="inline" style="justify-content:flex-end;margin-top:8px">
+        <button class="btn secondary rmCustom" type="button">Remove</button>
+      </div>`;
+    customRows.appendChild(row);
+    row.addEventListener('input', scheduleRender);
+    row.querySelector('.rmCustom').addEventListener('click', ()=>{ row.remove(); scheduleRender(); });
+  }
+  $('#addCustom').addEventListener('click', ()=>{ makeCustomRow(); scheduleRender(); });
+
+  // Static override
+  const staticOverride = $('#overrideStaticRes');
+  const staticInputs = [$('#staticH'), $('#staticW'), $('#staticFov')];
+  function syncStaticOverride(){ staticInputs.forEach(i=> i.disabled = !staticOverride.checked); }
+  staticOverride.addEventListener('change', ()=>{ syncStaticOverride(); scheduleRender(); }); syncStaticOverride();
+
+  // Wrist override
+  const wristOverride = $('#overrideWristRes');
+  const wristRes = $('#wristRes');
+  wristOverride.addEventListener('change', ()=> { wristRes.style.display = wristOverride.checked ? '' : 'none'; scheduleRender(); });
+
+  // Cameras collapse
+  const camsCard = $('#camsCard');
+  const camsBtn  = $('#camCollapseBtn');
+  function setCamsCollapsed(collapsed){
+    camsCard.classList.toggle('collapsed', collapsed);
+    camsBtn.setAttribute('aria-expanded', (!collapsed).toString());
+    localStorage.setItem('ds_cams_collapsed', collapsed ? '1' : '0');
+  }
+  camsBtn.addEventListener('click', ()=> setCamsCollapsed(!camsCard.classList.contains('collapsed')));
+  setCamsCollapsed(localStorage.getItem('ds_cams_collapsed') === '1');
+
+  // Visibility
+  function syncVisibility(){
+    const single = document.querySelector('input[name="robotType"]:checked').value === 'single';
+    $('#singleBlock').style.display = single ? '' : 'none';
+    $('#bimanualBlock').style.display = single ? 'none' : '';
+
+    const toggle = (name, yaw, quat)=>{
+      const mode = document.querySelector(`input[name="${name}"]:checked`)?.value || 'yaw';
+      $(yaw).style.display = (mode==='yaw') ? '' : 'none';
+      $(quat).style.display = (mode==='quat') ? '' : 'none';
+    };
+    toggle('singleOriMode', '#singleYawRow', '#singleQuatRow');
+    toggle('leftOriMode',   '#leftYawRow',   '#leftQuatRow');
+    toggle('rightOriMode',  '#rightYawRow',  '#rightQuatRow');
+
+    $('#leftPoseBlock').style.display  = $('#overrideLeft').checked  ? '' : 'none';
+    $('#rightPoseBlock').style.display = $('#overrideRight').checked ? '' : 'none';
+
+    if (!single && $('#layoutPreset').value === 'custom'){
+      $('#overrideLeft').checked = true;
+      $('#overrideRight').checked = true;
+      $('#leftPoseBlock').style.display  = '';
+      $('#rightPoseBlock').style.display = '';
+    }
+  }
+
+  // State helpers
+  function getCustomCams(){
+    return Array.from(customRows.children).map(row=>{
+      const g = sel=>row.querySelector(sel);
+      return {
+        type:'custom',
+        name: g('.c_name').value.trim() || 'unnamed',
+        fov: Number(g('.c_fov').value||55),
+        h: Number(g('.c_h').value||224),
+        w: Number(g('.c_w').value||224),
+        pos: [Number(g('.c_px').value||1.2), Number(g('.c_py').value||0), Number(g('.c_pz').value||0.6)],
+        lookat: [Number(g('.c_lx').value||0.4), Number(g('.c_ly').value||0), Number(g('.c_lz').value||0.2)],
+      };
+    });
+  }
+
+  function getState(){
+    const env = {
+      name: $('#envName').value.trim() || 'stack',
+      render_mode: $('#renderMode').value,
+      control_hz: Number($('#controlHz').value||100),
+      n_envs: Number($('#nEnvs').value||1),
+      performance_mode: $('#performanceMode').checked,
+    };
+
+    const robotType = document.querySelector('input[name="robotType"]:checked').value;
+    const single = {
+      manip: $('#singleManipulator').value,
+      gripper: ($('#singleGripper').value==='None') ? null : $('#singleGripper').value,
+      manipCtrl: { name: $('#singleManipCtrl').value, normalized: $('#singleManipNormalized').checked },
+      gripCtrl:  { name: $('#singleGripCtrl').value,  normalized: $('#singleGripNormalized').checked },
+      poseSingle: {
+        pos: [Number($('#singlePosX').value||0), Number($('#singlePosY').value||0), Number($('#singlePosZ').value||0)],
+        ori: (()=>{
+          const m = document.querySelector('input[name="singleOriMode"]:checked')?.value || 'yaw';
+          if (m==='quat'){
+            return {mode:m, quat:[
+              Number($('#singleQuatW').value||1), Number($('#singleQuatX').value||0),
+              Number($('#singleQuatY').value||0), Number($('#singleQuatZ').value||0)
+            ]};
+          }
+          return {mode:m, yawDeg:Number($('#singleYawDeg').value||0)};
+        })(),
+      },
+    };
+
+    const bimanual = {
+      left:  { manip: $('#leftManipulator').value,  gripper: ($('#leftGripper').value==='None')? null : $('#leftGripper').value },
+      right: { manip: $('#rightManipulator').value, gripper: ($('#rightGripper').value==='None')? null : $('#rightGripper').value },
+      sharedCtrls: {
+        manip: { name: $('#biManipCtrl').value, normalized: $('#biManipNormalized').checked },
+        grip:  { name: $('#biGripCtrl').value,  normalized: $('#biGripNormalized').checked },
+      },
+      layout: (()=>{
+        const preset = $('#layoutPreset').value;
+        const overrideLeft  = $('#overrideLeft').checked;
+        const overrideRight = $('#overrideRight').checked;
+        const leftPose = {
+          pos:[Number($('#leftPosX').value||0), Number($('#leftPosY').value||0.45), Number($('#leftPosZ').value||0)],
+          ori:(()=>{
+            const m = document.querySelector('input[name="leftOriMode"]:checked')?.value || 'yaw';
+            if(m==='quat'){ return {mode:m, quat:[
+              Number($('#leftQuatW').value||1), Number($('#leftQuatX').value||0),
+              Number($('#leftQuatY').value||0), Number($('#leftQuatZ').value||0)
+            ]}; }
+            return {mode:m, yawDeg:Number($('#leftYawDeg').value||90)};
+          })(),
+        };
+        const rightPose = {
+          pos:[Number($('#rightPosX').value||0), Number($('#rightPosY').value||-0.45), Number($('#rightPosZ').value||0)],
+          ori:(()=>{
+            const m = document.querySelector('input[name="rightOriMode"]:checked')?.value || 'yaw';
+            if(m==='quat'){ return {mode:m, quat:[
+              Number($('#rightQuatW').value||1), Number($('#rightQuatX').value||0),
+              Number($('#rightQuatY').value||0), Number($('#rightQuatZ').value||0)
+            ]}; }
+            return {mode:m, yawDeg:Number($('#rightYawDeg').value||-90)};
+          })(),
+        };
+        return { preset, overrideLeft, overrideRight, leftPose, rightPose };
+      })(),
+    };
+
+    const cams = {
+      staticPresets: Array.from(staticRows.querySelectorAll('.staticPreset')).map(s=>s.value),
+      staticCustom: getCustomCams(),
+      wrist: $('#wristCam').checked,
+      staticOverride: {
+        enabled: $('#overrideStaticRes').checked,
+        h: Number($('#staticH').value||224),
+        w: Number($('#staticW').value||224),
+        fov: Number($('#staticFov').value||55),
+      },
+      wristOverride: {
+        enabled: $('#overrideWristRes').checked,
+        h: Number($('#wristH').value||224),
+        w: Number($('#wristW').value||224),
+      },
+      modalities: Array.from($$('.modality:checked')).map(x=>x.value),
+    };
+
+    return { env, robot:{ type:robotType, single, bimanual }, cams };
+  }
+
+  // Validation
+  function validate(state){
+    const out = {errors:[], warnings:[], info:[]};
+    if(!state.env.name) out.errors.push('Environment name is required.');
+    if(state.env.control_hz < 1) out.errors.push('control_hz must be >= 1.');
+    if(state.env.n_envs < 1) out.errors.push('n_envs must be >= 1.');
+
+    const names = new Set(state.cams.staticPresets);
+    for(const c of state.cams.staticCustom){
+      if(names.has(c.name)) out.warnings.push(`Custom camera name "${c.name}" duplicates a preset key.`);
+      names.add(c.name);
+      if(c.h<16||c.w<16) out.errors.push(`Custom camera "${c.name}" resolution must be ≥ 16.`);
+      if(c.fov<1||c.fov>179) out.errors.push(`Custom camera "${c.name}" FOV must be 1–179.`);
+    }
+    if(state.cams.staticOverride.enabled){
+      const {h,w,fov} = state.cams.staticOverride;
+      if(h<16||w<16) out.errors.push('Static override resolution must be ≥ 16.');
+      if(fov<1||fov>179) out.errors.push('Static override FOV must be 1–179.');
+    }
+
+    if(state.robot.type==='single'){
+      if(core.INTEGRATED.has(state.robot.single.manip) && state.robot.single.gripper!==null){
+        out.errors.push(`"${state.robot.single.manip}" has an integrated gripper; external gripper must be None.`);
+      }
+      if(state.robot.single.poseSingle?.ori?.mode==='quat'){
+        const q = state.robot.single.poseSingle.ori.quat||[1,0,0,0]; const n = Math.hypot(...q);
+        if(Math.abs(n-1)>0.1) out.warnings.push('Single-arm quaternion norm deviates from 1.0.');
+      }
+    } else {
+      for (const side of ['left','right']){
+        const arm = state.robot.bimanual[side];
+        if(core.INTEGRATED.has(arm.manip) && arm.gripper!==null){
+          out.errors.push(`${side} manipulator has an integrated gripper; external gripper must be None.`);
+        }
+      }
+    }
+    return out;
+  }
+
+  function updateValidationUI(v){
+    const label = $('#validation');
+    const hasErr = v.errors.length>0, hasWarn = v.warnings.length>0;
+    label.className = 'status ' + (hasErr ? 'error' : hasWarn ? 'warn' : 'ok');
+    label.textContent = hasErr
+      ? `${v.errors.length} error${v.errors.length>1?'s':''}`
+      : hasWarn ? `${v.warnings.length} warning${v.warnings.length>1?'s':''}`
+      : 'All good';
+    $('#copyBtn').disabled = hasErr;
+    $('#downloadBtn').disabled = hasErr;
+  }
+
+  // Render
+  let rafId = 0;
+  function scheduleRender(){
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(()=>{
+      enforce('#singleManipulator','#singleGripper','#singleGripCtrl');
+      enforce('#leftManipulator','#leftGripper','#biGripCtrl');
+      enforce('#rightManipulator','#rightGripper','#biGripCtrl');
+      syncVisibility();
+
+      const state = getState();
+      currentCode = core.generateDexSuiteCode(state);
+
+      // PURE Python in the viewer (no HTML spans)
+      codeOut.textContent = currentCode;
+
+      const v = validate(state);
+      updateValidationUI(v);
+      saveState(state);
+    });
+  }
+
+  // Storage & share
+  const STORE_KEY = 'ds_ui_state_v3';
+  function saveState(state){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch{} }
+  function loadState(){
+    try{
+      const hash = new URLSearchParams(location.hash.slice(1));
+      const s64 = hash.get('s');
+      if(s64){ const raw = decodeURIComponent(escape(atob(s64))); return JSON.parse(raw); }
+      const s = localStorage.getItem(STORE_KEY); if(s) return JSON.parse(s);
+    }catch{}
+    return null;
+  }
+  function shareUrl(state){
+    const s64 = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+    const u = new URL(location.href); u.hash = 's='+s64; return u.toString();
+  }
+
+  // Buttons
+  $('#copyBtn').addEventListener('click', async ()=>{
+    const raw = currentCode || core.generateDexSuiteCode(getState());
+    try { await navigator.clipboard.writeText(raw); }
+    catch {
+      const ta = document.createElement('textarea'); ta.value = raw;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    }
+  });
+  $('#downloadBtn').addEventListener('click', ()=>{
+    const raw = currentCode || core.generateDexSuiteCode(getState());
+    const blob = new Blob([raw], {type:'text/x-python'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'dexsuite_make_generated.py';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1200);
+  });
+  $('#shareBtn').addEventListener('click', async ()=>{
+    const link = shareUrl(getState());
+    try { await navigator.clipboard.writeText(link); $('#shareBtn').textContent='Link copied'; setTimeout(()=>$('#shareBtn').textContent='Share', 1100); }
+    catch { prompt('Copy link:', link); }
+  });
+  $('#resetBtn').addEventListener('click', ()=>{
+    localStorage.removeItem(STORE_KEY); location.hash = ''; location.reload();
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e)=>{
+    const mac = navigator.platform.toUpperCase().includes('MAC'); const mod = mac ? e.metaKey : e.ctrlKey;
+    if(!mod) return;
+    if(e.key.toLowerCase()==='s'){ e.preventDefault(); $('#downloadBtn').click(); }
+    if(e.key.toLowerCase()==='c'){ if(document.activeElement!==codeOut){ e.preventDefault(); $('#copyBtn').click(); } }
+  });
+
+  // Bind
+  document.addEventListener('input', scheduleRender, {passive:true});
+  document.addEventListener('change', scheduleRender, {passive:true});
+  $('#layoutPreset').addEventListener('change', scheduleRender);
+
+  // Boot
+  (function boot(){
+    const saved = loadState();
+    if(saved){
+      staticRows.innerHTML=''; (saved.cams?.staticPresets?.length? saved.cams.staticPresets:['front']).forEach(p=>makeStaticRow(p));
+      const customRows = document.getElementById('customRows');
+      customRows.innerHTML=''; (saved.cams?.staticCustom||[]).forEach(c=>makeCustomRow(c));
+
+      // Env
+      $('#envName').value = saved.env?.name ?? 'stack';
+      $('#renderMode').value = saved.env?.render_mode ?? 'human';
+      $('#controlHz').value = saved.env?.control_hz ?? 100;
+      $('#nEnvs').value = saved.env?.n_envs ?? 1;
+      $('#performanceMode').checked = !!saved.env?.performance_mode;
+
+      // Robot type
+      const rt = saved.robot?.type ?? 'single';
+      (document.querySelector(`input[name="robotType"][value="${rt}"]`)||{}).checked = true;
+
+      // Single
+      $('#singleManipulator').value = saved.robot?.single?.manip ?? $('#singleManipulator').value;
+      $('#singleGripper').value = saved.robot?.single?.gripper ?? 'None';
+      $('#singleManipCtrl').value = saved.robot?.single?.manipCtrl?.name ?? 'joint_position';
+      $('#singleManipNormalized').checked = !!saved.robot?.single?.manipCtrl?.normalized;
+      $('#singleGripCtrl').value = saved.robot?.single?.gripCtrl?.name ?? 'joint_position';
+      $('#singleGripNormalized').checked = !!saved.robot?.single?.gripCtrl?.normalized;
+      const sp = saved.robot?.single?.poseSingle?.pos ?? [0,0,0];
+      $('#singlePosX').value = sp[0]; $('#singlePosY').value = sp[1]; $('#singlePosZ').value = sp[2];
+      const sori = saved.robot?.single?.poseSingle?.ori ?? {mode:'yaw', yawDeg:0};
+      (document.querySelector(`input[name="singleOriMode"][value="${sori.mode==='quat'?'quat':'yaw'}"]`)||{}).checked = true;
+      if (sori.mode==='quat'){ $('#singleQuatW').value=sori.quat?.[0]??1; $('#singleQuatX').value=sori.quat?.[1]??0; $('#singleQuatY').value=sori.quat?.[2]??0; $('#singleQuatZ').value=sori.quat?.[3]??0; }
+      else { $('#singleYawDeg').value = sori.yawDeg ?? 0; }
+
+      // Bimanual
+      $('#leftManipulator').value  = saved.robot?.bimanual?.left?.manip ?? $('#leftManipulator').value;
+      $('#leftGripper').value      = saved.robot?.bimanual?.left?.gripper ?? 'None';
+      $('#rightManipulator').value = saved.robot?.bimanual?.right?.manip ?? $('#rightManipulator').value;
+      $('#rightGripper').value     = saved.robot?.bimanual?.right?.gripper ?? 'None';
+      $('#biManipCtrl').value = saved.robot?.bimanual?.sharedCtrls?.manip?.name ?? 'joint_position';
+      $('#biManipNormalized').checked = !!saved.robot?.bimanual?.sharedCtrls?.manip?.normalized;
+      $('#biGripCtrl').value = saved.robot?.bimanual?.sharedCtrls?.grip?.name ?? 'joint_position';
+      $('#biGripNormalized').checked = !!saved.robot?.bimanual?.sharedCtrls?.grip?.normalized;
+
+      const lp = saved.robot?.bimanual?.layout?.leftPose?.pos ?? [0,0.45,0];
+      $('#leftPosX').value=lp[0]; $('#leftPosY').value=lp[1]; $('#leftPosZ').value=lp[2];
+      const lOri = saved.robot?.bimanual?.layout?.leftPose?.ori ?? {mode:'yaw', yawDeg:90};
+      (document.querySelector(`input[name="leftOriMode"][value="${lOri.mode==='quat'?'quat':'yaw'}"]`)||{}).checked = true;
+      if (lOri.mode==='quat'){ $('#leftQuatW').value=lOri.quat?.[0]??1; $('#leftQuatX').value=lOri.quat?.[1]??0; $('#leftQuatY').value=lOri.quat?.[2]??0; $('#leftQuatZ').value=lOri.quat?.[3]??0; }
+      else { $('#leftYawDeg').value = lOri.yawDeg ?? 90; }
+
+      const rp = saved.robot?.bimanual?.layout?.rightPose?.pos ?? [0,-0.45,0];
+      $('#rightPosX').value=rp[0]; $('#rightPosY').value=rp[1]; $('#rightPosZ').value=rp[2];
+      const rOri = saved.robot?.bimanual?.layout?.rightPose?.ori ?? {mode:'yaw', yawDeg:-90};
+      (document.querySelector(`input[name="rightOriMode"][value="${rOri.mode==='quat'?'quat':'yaw'}"]`)||{}).checked = true;
+      if (rOri.mode==='quat'){ $('#rightQuatW').value=rOri.quat?.[0]??1; $('#rightQuatX').value=rOri.quat?.[1]??0; $('#rightQuatY').value=rOri.quat?.[2]??0; $('#rightQuatZ').value=rOri.quat?.[3]??0; }
+      else { $('#rightYawDeg').value = rOri.yawDeg ?? -90; }
+
+      $('#layoutPreset').value = saved.robot?.bimanual?.layout?.preset ?? 'side_by_side';
+      $('#overrideLeft').checked  = !!saved.robot?.bimanual?.layout?.overrideLeft;
+      $('#overrideRight').checked = !!saved.robot?.bimanual?.layout?.overrideRight;
+
+      // Cams
+      $('#wristCam').checked = !!saved.cams?.wrist;
+      $('#overrideStaticRes').checked = !!saved.cams?.staticOverride?.enabled;
+      $('#staticH').value = saved.cams?.staticOverride?.h ?? 224;
+      $('#staticW').value = saved.cams?.staticOverride?.w ?? 224;
+      $('#staticFov').value = saved.cams?.staticOverride?.fov ?? 55;
+      $('#overrideWristRes').checked = !!saved.cams?.wristOverride?.enabled;
+      $('#wristH').value = saved.cams?.wristOverride?.h ?? 224;
+      $('#wristW').value = saved.cams?.wristOverride?.w ?? 224;
+      $$('.modality').forEach(x=>{ x.checked = (saved.cams?.modalities ?? ['rgb']).includes(x.value); });
+
+      wristRes.style.display = $('#overrideWristRes').checked ? '' : 'none';
+      setCamsCollapsed(localStorage.getItem('ds_cams_collapsed') === '1');
+    }
+    scheduleRender();
+  })();
+</script>
+</body>
+</html>

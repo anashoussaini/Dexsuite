@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mujoco model="tool_ratcheting_wrench">
+  <compiler angle="radian" coordinate="local"/>
+  <option gravity="0 0 -9.81"/>
+  <worldbody>
+    <body name="tool">
+      <joint name="tool_freejoint" type="free" damping="0.0005"/>
+      <geom name="tool_handle" type="box" pos="0 0 0" size="0.0825 0.00875 0.0016"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <!-- Hole 1 (box approximation of hollow cylinder) -->
+      <geom name="tool_hole1_hc_0" type="box" pos="-0.079 0 0" quat="1 0 0 0" size="0.0035 0.0066969601 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole1_hc_1" type="box" pos="-0.083100505 0.0098994949 0" quat="0.92387953 0 0 0.38268343" size="0.0035 0.0066969601 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole1_hc_2" type="box" pos="-0.093 0.014 0" quat="0.70710678 0 0 0.70710678" size="0.0035 0.0066969601 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole1_hc_3" type="box" pos="-0.10289949 0.0098994949 0" quat="0.38268343 0 0 0.92387953" size="0.0035 0.0066969601 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole1_hc_4" type="box" pos="-0.107 1.7145055e-18 0" quat="6.123234e-17 0 0 1" size="0.0035 0.0066969601 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole1_hc_5" type="box" pos="-0.10289949 -0.0098994949 0" quat="-0.38268343 0 0 0.92387953" size="0.0035 0.0066969601 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole1_hc_6" type="box" pos="-0.093 -0.014 0" quat="-0.70710678 0 0 0.70710678" size="0.0035 0.0066969601 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole1_hc_7" type="box" pos="-0.083100505 -0.0098994949 0" quat="-0.92387953 0 0 0.38268343" size="0.0035 0.0066969601 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <!-- Hole 2 (box approximation of hollow cylinder) -->
+      <geom name="tool_hole2_hc_0" type="box" pos="0.105 0 0" quat="1 0 0 0" size="0.0025 0.0057402515 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole2_hc_1" type="box" pos="0.10133883 0.0088388348 0" quat="0.92387953 0 0 0.38268343" size="0.0025 0.0057402515 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole2_hc_2" type="box" pos="0.0925 0.0125 0" quat="0.70710678 0 0 0.70710678" size="0.0025 0.0057402515 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole2_hc_3" type="box" pos="0.083661165 0.0088388348 0" quat="0.38268343 0 0 0.92387953" size="0.0025 0.0057402515 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole2_hc_4" type="box" pos="0.08 1.5308085e-18 0" quat="6.123234e-17 0 0 1" size="0.0025 0.0057402515 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole2_hc_5" type="box" pos="0.083661165 -0.0088388348 0" quat="-0.38268343 0 0 0.92387953" size="0.0025 0.0057402515 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole2_hc_6" type="box" pos="0.0925 -0.0125 0" quat="-0.70710678 0 0 0.70710678" size="0.0025 0.0057402515 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="tool_hole2_hc_7" type="box" pos="0.10133883 -0.0088388348 0" quat="-0.92387953 0 0 0.38268343" size="0.0025 0.0057402515 0.0035"
+            rgba="0.7 0.7 0.7 1" density="2000" friction="0.95 0.3 0.1"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <site name="tool_hole1_center" pos="-0.093 0 0" size="0.002" rgba="1 0 0 1" type="sphere"/>
+      <site name="tool_hole2_center" pos="0.0925 0 0" size="0.002" rgba="1 0 0 1" type="sphere"/>
+      <geom name="tool_grip" type="box" pos="0 0 0" quat="0.70710678 0 0.70710678 0"
+            size="0.015 0.015 0.04" rgba="0.13 0.13 0.13 1"
+            density="2000" friction="1 0.005 0.0001" solref="0.02 1" solimp="0.998 0.998 0.001"/>
+    </body>
+  </worldbody>
+</mujoco>

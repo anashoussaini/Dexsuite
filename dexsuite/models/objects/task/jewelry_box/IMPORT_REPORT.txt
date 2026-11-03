@@ -1,0 +1,6 @@
+# jewelry_box <- Artiverse jewelry_box/3dw/b392fb6d154df66bd1fba39ed6bb3f3f/urdf_w_collider/b392fb6d154df66bd1fba39ed6bb3f3f.urdf
+link_1_base: 5 primitive(s)
+  link_1_base: mass 1.0, visual bounds (link frame) lo [-0.125, -0.0781, -0.0635] hi [0.125, 0.0781, 0.0459]
+link_2_lid: 1 primitive(s)
+  link_2_lid: mass 0.25, visual bounds (link frame) lo [-0.1225, -0.1391, 0.0] hi [0.1275, 0.0172, 0.0176]
+  joint_2_to_1: revolute link_1_base -> link_2_lid limits [0.0, 1.5707963267948966] effort 20 damping 0.1 friction 0.2

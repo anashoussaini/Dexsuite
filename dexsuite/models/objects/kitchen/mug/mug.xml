@@ -1,0 +1,47 @@
+<mujoco model="mug">
+  <!-- Use radians for all Euler angles -->
+  <compiler angle="radian" />
+
+  <asset>
+    <!-- Visual assets -->
+    <texture  name="mug_texture" type="2d" file="mug/texture_map.png" />
+    <material name="mug_material" texture="mug_texture" />
+    <!-- Single OBJ used for both visual and collision -->
+    <mesh name="mug_mesh" file="mug/textured.obj" />
+  </asset>
+
+  <worldbody>
+    <body name="mug" pos="0 0 0" euler="0 0 0">
+      <freejoint name="mug_joint" />
+
+      <!-- Visual (non-colliding) mesh -->
+      <geom
+        name="mug_visual"
+        type="mesh"
+        mesh="mug_mesh"
+        material="mug_material"
+        pos="0.018858606464151616 -0.01657296231165061 -0.026898852026976835"
+        euler="0 0 0"
+        contype="0" conaffinity="0"
+        group="0"
+      />
+
+      <!-- Collision mesh (uses the same OBJ).
+           If your OBJ has thin walls or small holes, the sim loads fine
+           but fluids may leak. Consider a watertight collision proxy if needed. -->
+      <geom
+        name="mug_collision"
+        type="mesh"
+        mesh="mug_mesh"
+        pos="0.018858606464151616 -0.01657296231165061 -0.026898852026976835"
+        euler="0 0 0"
+        contype="1" conaffinity="1"
+        group="3"
+        friction="1.0 0.02 0.001"
+      />
+
+      <!-- Inertia: mass and diagonal inertia (tweak if you update the mesh scale) -->
+      <inertial pos="0 0 0" mass="0.118" diaginertia="0.001 0.001 0.001" />
+    </body>
+  </worldbody>
+</mujoco>

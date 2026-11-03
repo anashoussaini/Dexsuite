@@ -1,0 +1,19 @@
+# safe <- Artiverse safe/objaverse_xl/0e5a6386402c13fddcca2730fab2859c35cface4794b6cee0046eebc1e3ae38d/urdf_w_collider/0e5a6386402c13fddcca2730fab2859c35cface4794b6cee0046eebc1e3ae38d.urdf
+link_1_base: 5 primitive(s)
+  link_1_base: mass 60.0, visual bounds (link frame) lo [-0.1769, -0.2071, -0.3] hi [0.1769, 0.2501, 0.3]
+link_2_door: 2 primitive(s)
+  link_2_door: mass 12.0, visual bounds (link frame) lo [-0.272, -0.0202, -0.2215] hi [0.0187, 0.0568, 0.2141]
+link_3_handle: 10 CoACD piece(s), threshold 0.03
+  link_3_handle: mass 0.8, visual bounds (link frame) lo [-0.0941, -0.0132, -0.0613] hi [0.0954, 0.0194, 0.1028]
+link_4_dial_lock: 1 primitive(s)
+  link_4_dial_lock: mass 0.15, visual bounds (link frame) lo [-0.04, -0.0151, -0.0396] hi [0.0395, 0.0158, 0.0399]
+link_5_shelf: 1 primitive(s)
+  link_5_shelf: mass 1.0, visual bounds (link frame) lo [-0.1668, -0.1492, 0.0949] hi [0.1666, 0.2315, 0.1025]
+link_6_shelf: 1 primitive(s)
+  link_6_shelf: mass 1.0, visual bounds (link frame) lo [-0.1668, -0.1492, -0.0318] hi [0.1666, 0.2315, -0.0201]
+  recoloured MTLs: materials ['Safe', 'lambert2SG'], files ['3_handle', '4_dial_lock']
+  joint_2_to_1: revolute link_1_base -> link_2_door limits [0.0, 1.5707963267948966] effort 200 damping 5 friction 3
+  joint_3_to_2: revolute link_2_door -> link_3_handle limits [-3.141592653589793, 3.141592653589793] effort 50 damping 0.2 friction 0.3
+  joint_4_to_2: continuous link_2_door -> link_4_dial_lock limits [None, None] effort 5 damping 0.02 friction 0.02
+  joint_5_to_1: fixed link_1_base -> link_5_shelf
+  joint_6_to_1: fixed link_1_base -> link_6_shelf

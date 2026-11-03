@@ -1,0 +1,18 @@
+ACT (Action Chunking with Transformers) for robomimic, in act.py, act_nets.py and act_config.py.
+
+These files re-implement the policy of the original ACT code (https://github.com/tonyzhaozh/act),
+Copyright (c) 2023 Tony Z. Zhao, licensed under the MIT License (LICENSE-ACT in this folder). ACT's model code
+(its detr/ folder) is modified from DETR (https://github.com/facebookresearch/detr), Copyright (c) Facebook, Inc.
+and its affiliates, licensed under the Apache License 2.0 (LICENSE-DETR in this folder).
+
+The DexSuite authors adapted and modified these parts:
+- act_nets.py: reparametrize and get_sinusoid_encoding_table (ACT detr/models/detr_vae.py); PositionEmbeddingSine
+  (DETR models/position_encoding.py as modified in ACT, without the padding mask); _DetrEncoderLayer and
+  _DetrDecoderLayer (the post-norm layers of DETR models/transformer.py, without attention masks); the ResNet18
+  backbone with frozen batch norm (DETR models/backbone.py); the CVAE encoder and the token layout of the policy
+  (ACT detr/models/detr_vae.py), rebuilt on robomimic modules.
+- act.py: the L1 + KL loss (ACT policy.py), the separate backbone learning rate (ACT detr/main.py) and the
+  temporal ensembling of action chunks (ACT imitate_episodes.py).
+
+dataset_action_keys_patch.py replaces robomimic's SequenceDataset.get_dataset_for_ep with a modified copy
+(robomimic, Copyright (c) 2021 Stanford Vision and Learning Lab, MIT License, shipped with the robomimic package).

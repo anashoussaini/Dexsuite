@@ -1,0 +1,7 @@
+Sharpa Wave hand models from Sharpa's sharpa-vision-retargeting-sdk
+(https://github.com/sharpa-robotics/sharpa-vision-retargeting-sdk, sharpa-urdf-usd-xml/wave_01),
+Copyright 2026 Sharpa Group, licensed under the Apache License 2.0 (LICENSE in this folder).
+
+The meshes in left_meshes/ and right_meshes/ are unmodified. The DexSuite authors modified
+left_sharpa_wave_with_flange.urdf, left_sharpa_wave_with_flange.xml, right_sharpa_wave_with_flange.urdf and
+right_sharpa_wave_with_flange.xml for use in DexSuite.

@@ -1,0 +1,12 @@
+description: Disable train-time rollout evaluation.
+config:
+  experiment:
+    render_video: false
+    rollout:
+      enabled: false
+rollout_args:
+  n_rollouts: 0
+  horizon: 400
+  video_skip: 5
+  camera_names:
+    - front

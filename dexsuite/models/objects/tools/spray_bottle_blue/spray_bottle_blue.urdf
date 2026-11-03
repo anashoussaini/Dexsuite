@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="spray_bottle_blue">
+  <link name="link_1_container">
+    <inertial>
+      <origin xyz="0.000206531 0.000452376 -0.06" rpy="0 0 0" />
+      <mass value="0.9" />
+      <inertia ixx="0.00367725" ixy="-9.15918e-05" ixz="-9.67605e-05" iyy="0.00380552" iyz="-5.03705e-05" izz="0.00056154" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/1_container__bottle.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_1_container.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link_2_handle">
+    <inertial>
+      <origin xyz="-0.00397345 -0.00210759 -0.0118285" rpy="0 0 0" />
+      <mass value="0.02" />
+      <inertia ixx="2.42644e-06" ixy="-8.13056e-08" ixz="-9.16996e-07" iyy="2.5403e-06" iyz="-4.77358e-07" izz="1.13297e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0.023284 0.011798 -0.107532" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/2_handle__03.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_2_handle.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link_3_head">
+    <inertial>
+      <origin xyz="-0.00737643 -0.0031918 0.00356421" rpy="0 0 0" />
+      <mass value="0.05" />
+      <inertia ixx="1.21958e-05" ixy="-5.80121e-06" ixz="1.17888e-07" iyy="2.02987e-05" iyz="5.76716e-08" izz="2.2504e-05" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.010113 -0.004929 -0.106225" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/3_head__04.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.010113 -0.004929 -0.106225" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/3_head__opacity_plastic.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.010113 -0.004929 -0.106225" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/3_head__top.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_3_head.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link_4_nozzle">
+    <inertial>
+      <origin xyz="0.000485742 0.0002534 0.000396464" rpy="0 0 0" />
+      <mass value="0.005" />
+      <inertia ixx="1.28591e-07" ixy="2.62879e-08" ixz="3.3328e-09" iyy="9.1777e-08" iyz="1.7349e-09" izz="1.37551e-07" />
+    </inertial>
+    <visual>
+      <origin xyz="0.035802 0.018181 -0.118231" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/4_nozzle__03.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_4_nozzle.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_2_to_3" type="revolute">
+    <parent link="link_3_head" />
+    <child link="link_2_handle" />
+    <origin xyz="-0.03339746985543426 -0.01672693830223112 0.001306445232886283" rpy="0 0 0" />
+    <axis xyz="0.46174861353127283 -0.8870108330240095 5.431374887359403e-17" />
+    <limit lower="0" upper="0.3927" effort="5" velocity="5.0" />
+    <dynamics damping="0.02" friction="0.01" />
+  </joint>
+  <joint name="joint_3_to_1" type="fixed">
+    <parent link="link_1_container" />
+    <child link="link_3_head" />
+    <origin xyz="0.010113086124694236 0.004929358517803259 0.10622536456713036" rpy="0 0 0" />
+  </joint>
+  <joint name="joint_4_to_3" type="fixed">
+    <parent link="link_3_head" />
+    <child link="link_4_nozzle" />
+    <origin xyz="-0.04591556424057996 -0.023110066325511082 0.012005762118859509" rpy="0 0 0" />
+  </joint>
+</robot>

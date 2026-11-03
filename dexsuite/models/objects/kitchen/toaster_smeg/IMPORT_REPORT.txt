@@ -1,0 +1,9 @@
+# toaster_smeg <- Artiverse toaster/objaverse/37e9755326084ef294581d17acdeb4c4/urdf_w_collider/37e9755326084ef294581d17acdeb4c4.urdf
+link_1_base: 7 primitive(s)
+  link_1_base: mass 1.5, visual bounds (link frame) lo [-0.0976, -0.0598, -0.0618] hi [0.0992, 0.0598, 0.0615]
+link_4_rotary_dial: 1 visual hull(s)
+  link_4_rotary_dial: mass 0.02, visual bounds (link frame) lo [-0.0046, -0.0147, -0.0148] hi [0.0046, 0.0147, 0.0148]
+link_5_lever: 1 visual hull(s)
+  link_5_lever: mass 0.02, visual bounds (link frame) lo [-0.0992, -0.0061, 0.0398] hi [-0.0618, 0.0061, 0.0618]
+  joint_4_to_1: revolute link_1_base -> link_4_rotary_dial limits [-3.141592653589793, 3.141592653589793] effort 5 damping 0.05 friction 0.05
+  joint_5_to_1: prismatic link_1_base -> link_5_lever limits [-0.054, 0] effort 100 damping 2 friction 2

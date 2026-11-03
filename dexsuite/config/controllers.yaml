@@ -1,0 +1,41 @@
+defaults:
+  manipulator: osc_pose
+  gripper: joint_position
+
+controllers:
+  joint_position:
+    normalized: true
+    clip: false
+  joint_velocity:
+    normalized: true
+    clip: true
+    v_max: 1.0
+  joint_torque:
+    normalized: true
+    clip: false
+    tau_max: 1.0
+  osc_pose:
+    normalized: true
+    clip: true
+    lin_scale: 0.7
+    ang_scale: 0.12
+  osc_pose_abs:
+    normalized: true
+    clip: false
+    lin_range: [1.5, 1.0, 1.0]
+    ang_range: [3.1415, 3.1415, 3.1415]
+  ik_pose:
+    ik_max_iters: 100
+    ik_damping: 0.05
+    ik_max_step: 0.2
+    ik_init: home
+  osc_pose_abs_quat:
+    normalized: false
+    clip: false
+    lin_range: [1.5, 1.0, 1.0]
+    position_cost: 2.0
+    orientation_cost: 2.0
+    posture_cost: 0.1
+    damping_cost: 0.01
+    max_joint_step: 0.35
+    pos_tol: 0.001

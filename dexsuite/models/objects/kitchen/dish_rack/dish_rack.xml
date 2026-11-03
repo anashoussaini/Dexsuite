@@ -1,0 +1,83 @@
+<mujoco model="dish_rack">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="Material" specular="0.36842099999999994" shininess="0.104654449" rgba="0.698193 0.555022 0.591208 0.973684"/>
+    <mesh file="dish_rack.obj"/>
+    <mesh file="dish_rack_collision_0.obj"/>
+    <mesh file="dish_rack_collision_1.obj"/>
+    <mesh file="dish_rack_collision_2.obj"/>
+    <mesh file="dish_rack_collision_3.obj"/>
+    <mesh file="dish_rack_collision_4.obj"/>
+    <mesh file="dish_rack_collision_5.obj"/>
+    <mesh file="dish_rack_collision_6.obj"/>
+    <mesh file="dish_rack_collision_7.obj"/>
+    <mesh file="dish_rack_collision_8.obj"/>
+    <mesh file="dish_rack_collision_9.obj"/>
+    <mesh file="dish_rack_collision_10.obj"/>
+    <mesh file="dish_rack_collision_11.obj"/>
+    <mesh file="dish_rack_collision_12.obj"/>
+    <mesh file="dish_rack_collision_13.obj"/>
+    <mesh file="dish_rack_collision_14.obj"/>
+    <mesh file="dish_rack_collision_15.obj"/>
+    <mesh file="dish_rack_collision_16.obj"/>
+    <mesh file="dish_rack_collision_17.obj"/>
+    <mesh file="dish_rack_collision_18.obj"/>
+    <mesh file="dish_rack_collision_19.obj"/>
+    <mesh file="dish_rack_collision_20.obj"/>
+    <mesh file="dish_rack_collision_21.obj"/>
+    <mesh file="dish_rack_collision_22.obj"/>
+    <mesh file="dish_rack_collision_23.obj"/>
+    <mesh file="dish_rack_collision_24.obj"/>
+    <mesh file="dish_rack_collision_25.obj"/>
+    <mesh file="dish_rack_collision_26.obj"/>
+    <mesh file="dish_rack_collision_27.obj"/>
+    <mesh file="dish_rack_collision_28.obj"/>
+    <mesh file="dish_rack_collision_29.obj"/>
+    <mesh file="dish_rack_collision_30.obj"/>
+    <mesh file="dish_rack_collision_31.obj"/>
+  </asset>
+  <worldbody>
+    <body name="dish_rack">
+      <geom material="Material" mesh="dish_rack" class="visual"/>
+      <geom mesh="dish_rack_collision_0" rgba="0.20706451430932815 0.9583855904777651 0.4459291578715656 1" class="collision"/>
+      <geom mesh="dish_rack_collision_1" rgba="0.19932527072895223 0.5426561081795495 0.17409993691800807 1" class="collision"/>
+      <geom mesh="dish_rack_collision_2" rgba="0.2990452313730071 0.7185395230656241 0.2211559173666262 1" class="collision"/>
+      <geom mesh="dish_rack_collision_3" rgba="0.46945392984194334 0.8539591963817036 0.03562711856426104 1" class="collision"/>
+      <geom mesh="dish_rack_collision_4" rgba="0.7610642594202582 0.248348149547701 0.9581007968334244 1" class="collision"/>
+      <geom mesh="dish_rack_collision_5" rgba="0.8217715365641268 0.939169146091783 0.1358643023378634 1" class="collision"/>
+      <geom mesh="dish_rack_collision_6" rgba="0.7852313897375919 0.24831522489032343 0.15127330324155353 1" class="collision"/>
+      <geom mesh="dish_rack_collision_7" rgba="0.772216884425005 0.6252714321154248 0.4888551645820315 1" class="collision"/>
+      <geom mesh="dish_rack_collision_8" rgba="0.12214872350845551 0.20853683856113236 0.21147889686222165 1" class="collision"/>
+      <geom mesh="dish_rack_collision_9" rgba="0.7110382898799885 0.852808995798795 0.34246224578781903 1" class="collision"/>
+      <geom mesh="dish_rack_collision_10" rgba="0.5977171916171302 0.5077732034053283 0.20410422259340333 1" class="collision"/>
+      <geom mesh="dish_rack_collision_11" rgba="0.31268523855584485 0.43447181195366424 0.871199197534072 1" class="collision"/>
+      <geom mesh="dish_rack_collision_12" rgba="0.435261975651105 0.6416323869513711 0.8595354380765745 1" class="collision"/>
+      <geom mesh="dish_rack_collision_13" rgba="0.41527177114281977 0.024503545527606474 0.8719212456246114 1" class="collision"/>
+      <geom mesh="dish_rack_collision_14" rgba="0.4759483467072436 0.7569265965299988 0.2389020629818528 1" class="collision"/>
+      <geom mesh="dish_rack_collision_15" rgba="0.1251339138722427 0.7528810170998708 0.5429299160120357 1" class="collision"/>
+      <geom mesh="dish_rack_collision_16" rgba="0.6064813067024415 0.19644679361695805 0.8791313773098401 1" class="collision"/>
+      <geom mesh="dish_rack_collision_17" rgba="0.12114816761157743 0.5691867047637071 0.010476931021549118 1" class="collision"/>
+      <geom mesh="dish_rack_collision_18" rgba="0.058849844286406716 0.7555402674983757 0.4554440341382153 1" class="collision"/>
+      <geom mesh="dish_rack_collision_19" rgba="0.6117959305053271 0.42962676065618477 0.30206244509702396 1" class="collision"/>
+      <geom mesh="dish_rack_collision_20" rgba="0.5917754687396718 0.7739998067156229 0.8041741165109452 1" class="collision"/>
+      <geom mesh="dish_rack_collision_21" rgba="0.8906787752200922 0.4242861873967282 0.3738408961665066 1" class="collision"/>
+      <geom mesh="dish_rack_collision_22" rgba="0.803870956657203 0.5311049061243089 0.19859677385731267 1" class="collision"/>
+      <geom mesh="dish_rack_collision_23" rgba="0.7326172503852726 0.14566833835637116 0.7549149497725852 1" class="collision"/>
+      <geom mesh="dish_rack_collision_24" rgba="0.48685229308345235 0.24297672753160082 0.7243152349649954 1" class="collision"/>
+      <geom mesh="dish_rack_collision_25" rgba="0.05106709358882611 0.9757666108051807 0.594443079358451 1" class="collision"/>
+      <geom mesh="dish_rack_collision_26" rgba="0.048627422990143776 0.00535277852961491 0.07322546430154597 1" class="collision"/>
+      <geom mesh="dish_rack_collision_27" rgba="0.958105677706051 0.2745527621595045 0.8007071559888459 1" class="collision"/>
+      <geom mesh="dish_rack_collision_28" rgba="0.554191666662418 0.1770677814386269 0.1317065149295047 1" class="collision"/>
+      <geom mesh="dish_rack_collision_29" rgba="0.4270895680672959 0.4457847256253339 0.580345360665049 1" class="collision"/>
+      <geom mesh="dish_rack_collision_30" rgba="0.5393217266326846 0.6997237620391508 0.08438248031776252 1" class="collision"/>
+      <geom mesh="dish_rack_collision_31" rgba="0.22530765586535784 0.4073079386775508 0.20081273368593533 1" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

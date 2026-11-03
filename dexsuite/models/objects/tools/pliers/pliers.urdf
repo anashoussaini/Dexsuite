@@ -1,0 +1,172 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="pliers">
+  <link name="link_5_screw">
+    <inertial>
+      <origin xyz="-4.77794e-20 -0.0106188 6.16509e-20" rpy="0 0 0" />
+      <mass value="0.01" />
+      <inertia ixx="1.2929e-07" ixy="7.77082e-24" ixz="9.63295e-25" iyy="1.2929e-07" iyz="-1.42529e-23" izz="1.2358e-07" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/5_screw__material_0_24.obj" />
+      </geometry>
+    </visual>
+  </link>
+  <link name="link_6_leg">
+    <inertial>
+      <origin xyz="-0.0252522 0.0208424 -0.00471714" rpy="0 0 0" />
+      <mass value="0.1" />
+      <inertia ixx="0.000149546" ixy="3.09069e-05" ixz="3.8193e-07" iyy="1.92545e-05" iyz="-2.01206e-07" izz="0.00016396" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.000615 0.010370 -0.004500" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/6_leg__material_0_24.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.000615 0.010370 -0.004500" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/6_leg__material_2_24.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.000615 0.010370 -0.004500" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/6_leg__material_3_24.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_6_leg/link_6_leg_0.obj" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_6_leg/link_6_leg_1.obj" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_6_leg/link_6_leg_2.obj" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_6_leg/link_6_leg_3.obj" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_6_leg/link_6_leg_4.obj" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_6_leg/link_6_leg_5.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link_7_jaw">
+    <inertial>
+      <origin xyz="0.00550841 -0.0232997 -0.00398383" rpy="0 0 0" />
+      <mass value="0.03" />
+      <inertia ixx="1.29187e-05" ixy="3.37476e-06" ixz="1.05931e-07" iyy="1.53127e-06" iyz="-2.23714e-07" izz="1.41398e-05" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.001766 0.011125 -0.004500" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/7_jaw__material_0_24.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_7_jaw.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link_8_handle">
+    <inertial>
+      <origin xyz="0.0288883 0.0481768 -0.0045" rpy="0 0 0" />
+      <mass value="0.1" />
+      <inertia ixx="7.10915e-05" ixy="-2.48047e-05" ixz="4.42739e-15" iyy="1.57976e-05" iyz="1.20684e-14" izz="8.11561e-05" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.001766 0.011125 -0.004500" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/8_handle__material_2_24.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.001766 0.011125 -0.004500" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/8_handle__material_0_24.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.001766 0.011125 -0.004500" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/8_handle__material_3_24.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_8_handle/link_8_handle_0.obj" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_8_handle/link_8_handle_1.obj" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_8_handle/link_8_handle_2.obj" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_8_handle/link_8_handle_3.obj" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_8_handle/link_8_handle_4.obj" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_8_handle/link_8_handle_5.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_6_to_5" type="fixed">
+    <parent link="link_5_screw" />
+    <child link="link_6_leg" />
+    <origin xyz="0.0006151763679923397 -0.01037045809602992 0.0045000000945292365" rpy="0 0 0" />
+  </joint>
+  <joint name="joint_8_to_5" type="fixed">
+    <parent link="link_5_screw" />
+    <child link="link_8_handle" />
+    <origin xyz="0.0017661999467323268 -0.011125084074410943 0.004500000094529294" rpy="0 0 0" />
+  </joint>
+  <joint name="joint_7_to_8" type="fixed">
+    <parent link="link_8_handle" />
+    <child link="link_7_jaw" />
+    <origin xyz="0.000000 0.000000 0.000000" rpy="0.000000 -0.000000 0.000000" />
+  </joint>
+</robot>

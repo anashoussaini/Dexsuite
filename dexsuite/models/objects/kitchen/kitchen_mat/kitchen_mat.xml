@@ -1,0 +1,36 @@
+<mujoco model="kitchen_mat">
+  <compiler angle="radian"/>
+
+  <!-- Defaults -->
+  <default>
+    <!-- visual meshes don’t collide -->
+    <default class="visual">
+      <geom type="mesh" group="2" contype="0" conaffinity="0"/>
+    </default>
+    <!-- collision geoms use a box with friction -->
+    <default class="collision">
+      <geom type="box" group="3" friction="1.0 0.02 0.001"/>
+    </default>
+  </default>
+
+  <!-- Assets -->
+  <asset>
+    <texture  name="mat_tex" type="2d" file="kitchen_mat.png"/>
+    <material name="mat_mat" texture="mat_tex" specular="0.0" shininess="0.5"/>
+    <mesh     name="kitchen_mat" file="kitchen_mat.obj"/>
+  </asset>
+
+  <worldbody>
+    <!-- fixed body (edit pos="..." if you want to move the mat) -->
+    <body name="kitchen_mat" pos="0 0 0">
+      <!-- textured visual mesh -->
+      <geom class="visual" material="mat_mat" mesh="kitchen_mat"/>
+
+      <!-- box collider: half-extents 0.30 × 0.20 × 0.0025 m
+           (=> full size 0.60 × 0.40 × 0.005 m) -->
+      <geom class="collision" type="box"
+            size="0.300 0.200 0.0025"
+            pos ="0     0     0.0025"/>
+    </body>
+  </worldbody>
+</mujoco>

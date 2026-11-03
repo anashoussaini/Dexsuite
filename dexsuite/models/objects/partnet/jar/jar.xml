@@ -1,0 +1,92 @@
+<mujoco model="partnet_fdc47f5f8dff184830eaaf40a8a562c1">
+  <!-- Matches URDF numbers exactly (1×). Angles in radians; meshes under ./textured_objs -->
+  <compiler angle="radian" meshdir="textured_objs" inertiafromgeom="true"/>
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+  <size nconmax="400" njmax="2000"/>
+
+  <default>
+    <!-- Visuals: show in viewer, no collision/mass -->
+    <default class="visual">
+      <geom contype="0" conaffinity="0" group="2" mass="0"/>
+    </default>
+    <!-- Collisions: enabled for physics, but invisible so they don't mess up the look -->
+    <default class="collision">
+      <geom contype="1" conaffinity="1" group="1" friction="1.0 0.01 0.01" rgba="1 1 1 0"/>
+    </default>
+  </default>
+
+  <asset>
+    <mesh name="m_lid"   file="original-1.obj"/>
+    <mesh name="m_new_1" file="new-1.obj"/>
+    <mesh name="m_new_3" file="new-3.obj"/>
+    <mesh name="m_o_4"   file="original-4.obj"/>
+    <mesh name="m_o_39"  file="original-39.obj"/>
+    <mesh name="m_o_18"  file="original-18.obj"/>
+    <mesh name="m_o_32"  file="original-32.obj"/>
+    <mesh name="m_o_25"  file="original-25.obj"/>
+    <mesh name="m_o_11"  file="original-11.obj"/>
+  </asset>
+
+  <worldbody>
+    <!-- URDF base -->
+    <body name="base">
+      <!-- joint_1: fixed rpy="pi/2 0 -pi/2" -->
+      <body name="link_1" euler="1.570796326794897 0 -1.570796326794897">
+        <!-- VISUALS (as in URDF) -->
+        <geom name="v_body_13"    class="visual"   type="mesh" mesh="m_new_1"/>
+        <geom name="v_neck_14"    class="visual"   type="mesh" mesh="m_new_3"/>
+        <geom name="v_other_4"    class="visual"   type="mesh" mesh="m_o_4"/>
+        <geom name="v_other_39"   class="visual"   type="mesh" mesh="m_o_39"/>
+        <geom name="v_other_18_a" class="visual"   type="mesh" mesh="m_o_18"/>
+        <geom name="v_other_32"   class="visual"   type="mesh" mesh="m_o_32"/>
+        <geom name="v_other_25"   class="visual"   type="mesh" mesh="m_o_25"/>
+        <geom name="v_other_11"   class="visual"   type="mesh" mesh="m_o_11"/>
+
+        <!-- COLLISIONS (invisible so visuals remain clean) -->
+        <geom name="c_new_1" type="mesh" mesh="m_new_1" class="collision"/>
+        <geom name="c_new_3" type="mesh" mesh="m_new_3" class="collision"/>
+        <geom name="c_o_4"   type="mesh" mesh="m_o_4"   class="collision"/>
+        <geom name="c_o_39"  type="mesh" mesh="m_o_39"  class="collision"/>
+        <geom name="c_o_18"  type="mesh" mesh="m_o_18"  class="collision"/>
+        <geom name="c_o_32"  type="mesh" mesh="m_o_32"  class="collision"/>
+        <geom name="c_o_25"  type="mesh" mesh="m_o_25"  class="collision"/>
+        <geom name="c_o_11"  type="mesh" mesh="m_o_11"  class="collision"/>
+
+        <!-- joint_2: prismatic; origin xyz = [-0.002291089456653725, 0, -0.01429] -->
+        <body name="link_0_helper" pos="-0.002291089456653725 0 -0.01429">
+          <!-- MOVING BODY needs mass/inertia: invisible, non-colliding proxy -->
+          <geom name="slide_inertia" type="cylinder"
+                euler="-1.570796326794897 0 0"
+                size="0.037 0.007" mass="0.04"
+                rgba="1 1 1 0" contype="0" conaffinity="0"/>
+          <joint name="joint_2" type="slide" axis="0 1 0" range="-0.064 0.264" damping="0.1"/>
+
+          <!-- joint_0: hinge (URDF 'continuous'—no limits) -->
+          <body name="link_0">
+            <!-- MOVING BODY needs mass/inertia: invisible, non-colliding proxy -->
+            <geom name="lid_inertia" type="cylinder"
+                  euler="-1.570796326794897 0 0"
+                  size="0.037 0.0075" mass="0.06"
+                  rgba="1 1 1 0" contype="0" conaffinity="0"/>
+            <joint name="joint_0" type="hinge" axis="0 1 0"/>
+
+            <!-- VISUAL + COLLISION for lid at URDF origin (0.002291..., 0, 0.01429) -->
+            <geom name="v_lid_19" type="mesh" mesh="m_lid"
+                  pos="0.002291089456653725 0 0.01429" class="visual"/>
+            <geom name="c_lid"    type="mesh" mesh="m_lid"
+                  pos="0.002291089456653725 0 0.01429" class="collision"/>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <!-- OPTIONAL: helical mimic (1× scale). Uncomment if you want twist→lift.
+  <equality>
+    <joint name="screw_coupling"
+           joint1="joint_2" joint2="joint_0"
+           polycoef="-0.064 0.10440564266828335 0 0 0"
+           solref="0.02 1" solimp="0.9 0.95 0.001"/>
+  </equality>
+  -->
+</mujoco>

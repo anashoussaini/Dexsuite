@@ -1,0 +1,7 @@
+link_0 slider container
+link_1 slider lid
+link_2 slider button
+link_3 slider button
+link_4 slider button
+link_5 slider slider
+link_6 free coffee_machine_body

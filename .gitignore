@@ -1,0 +1,54 @@
+# Python bytecode and cache
+*.pyc
+__pycache__/
+.numba_cache/
+
+# Environment and editor files
+.env
+.venv
+.vscode
+env/
+venv/
+env.bak/
+venv.bak/
+
+# macOS files
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
+
+# Build and data files
+runs/
+dexsuite.egg-info/
+*.hdf5
+*.egg-info/
+build/
+dist/
+dist*/
+*.whl
+*.tar.gz
+.pytest_cache/
+pick_place/
+pick_place_mug/
+dexsuite/agents/
+stack/
+pick_place_pan/
+venv/
+
+# Jupyter Notebook files and checkpoints
+*.ipynb
+.ipynb_checkpoints/
+ds
+np
+time
+torch
+
+dex-retargeting
+
+GeoRT
+dexsuite-0.1.0/
+dexsuite_builder_spec.json
+collected_dataset/
+datasets/
+.codex

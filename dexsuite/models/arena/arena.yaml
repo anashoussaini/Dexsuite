@@ -1,0 +1,23 @@
+plane:
+  enabled: true
+  pos: [0, 0, 0]
+  material: "blacktiles"
+
+walls:
+  enabled: false
+  default_rgba: [0.82, 0.86, 0.90, 1]
+
+  items:
+  - { name: wall_leftcorner,  pos: [ -2.00,  3.60, 0 ], quat: [ 0.6532815, 0.6532815,  0.2705981,  0.2705981 ], size: [ 3.392, 3.0, 0.01] }
+  - { name: wall_rightcorner, pos: [ -2.00, -3.60, 0 ], quat: [ 0.6532815, 0.6532815, -0.2705981, -0.2705981 ], size: [ 3.392, 3.0, 0.01] }
+  - { name: wall_left,        pos: [  2.00,  4.80, 0 ], quat: [ 0.7071,    0.7071,     0.0000,     0.0000 ],    size: [ 5.600, 3.0, 0.01] }
+  - { name: wall_right,       pos: [  2.00, -4.80, 0 ], quat: [ 0.7071,   -0.7071,     0.0000,     0.0000 ],    size: [ 5.600, 3.0, 0.01] }
+  - { name: wall_rear,        pos: [ -3.20,  0.00, 0 ], quat: [ 0.5,       0.5,        0.5,        0.5 ],       size: [ 4.800, 3.0, 0.01] }
+  - { name: wall_front,       pos: [  4.80,  0.00, 0 ], quat: [ 0.5,       0.5,       -0.5,       -0.5 ],       size: [ 9.600, 3.0, 0.01] }
+
+table:
+  enabled: true
+  file: "assets/vention_table/ventionTable.xml"
+  height: 0.83
+  pos: [0.40, 0.0, 0.0]
+  euler_deg: [0.0, 0.0, 90.0]

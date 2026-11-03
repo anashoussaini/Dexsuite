@@ -1,0 +1,10 @@
+# Image ACT observation profile, mirroring the paper's image diffusion runs:
+# front camera RGB + robot proprio only (no object state, no depth, no wrist camera).
+obs:
+  low_dim:
+  - state_manipulator_eef_pos
+  - state_gripper_tcp_pos
+  - state_gripper_qpos
+  rgb:
+  - cameras_front_rgb
+  depth: []

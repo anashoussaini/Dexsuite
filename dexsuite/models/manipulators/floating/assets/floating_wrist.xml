@@ -1,0 +1,36 @@
+<mujoco model="floating_wrist">
+  <!-- Virtual 6-DoF gantry with no geometry: x/y/z slides then roll (X) / pitch (Y) / yaw (Z) hinges.
+       Bodies carry tiny explicit inertials (MuJoCo rejects massless moving bodies); the hand is attached
+       to `attachment`. Slide ranges are the reachable volume over the table (z down to below the table top). -->
+  <compiler angle="radian" autolimits="true"/>
+  <default>
+    <joint armature="0.01" damping="0.5"/>
+  </default>
+  <worldbody>
+    <body name="gantry_x" pos="0 0 0">
+      <inertial pos="0 0 0" mass="0.05" diaginertia="1e-4 1e-4 1e-4"/>
+      <joint name="tx" type="slide" axis="1 0 0" range="-0.5 1.5"/>
+      <body name="gantry_y">
+        <inertial pos="0 0 0" mass="0.05" diaginertia="1e-4 1e-4 1e-4"/>
+        <joint name="ty" type="slide" axis="0 1 0" range="-1.0 1.0"/>
+        <body name="gantry_z">
+          <inertial pos="0 0 0" mass="0.05" diaginertia="1e-4 1e-4 1e-4"/>
+          <joint name="tz" type="slide" axis="0 0 1" range="-0.1 1.2"/>
+          <body name="wrist_roll">
+            <inertial pos="0 0 0" mass="0.05" diaginertia="1e-4 1e-4 1e-4"/>
+            <joint name="roll" type="hinge" axis="1 0 0" range="-3.1416 3.1416"/>
+            <body name="wrist_pitch">
+              <inertial pos="0 0 0" mass="0.05" diaginertia="1e-4 1e-4 1e-4"/>
+              <joint name="pitch" type="hinge" axis="0 1 0" range="-3.1416 3.1416"/>
+              <body name="attachment">
+                <inertial pos="0 0 0" mass="0.05" diaginertia="1e-4 1e-4 1e-4"/>
+                <joint name="yaw" type="hinge" axis="0 0 1" range="-3.1416 3.1416"/>
+                <site name="attachment_site"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>

@@ -1,0 +1,12 @@
+# spray_bottle_blue <- Artiverse spray_bottle/objaverse_xl/745b7335cb77ce1b58ec5637ba29072a94d0337acb5185ecac7b56b9d1242808/urdf_w_collider/745b7335cb77ce1b58ec5637ba29072a94d0337acb5185ecac7b56b9d1242808.urdf
+link_1_container: merged hull (250 faces)
+  link_1_container: mass 0.9, visual bounds (link frame) lo [-0.0459, -0.0389, -0.125] hi [0.0459, 0.0389, 0.0975]
+link_2_handle: merged hull (42 faces)
+  link_2_handle: mass 0.02, visual bounds (link frame) lo [-0.0185, -0.0139, -0.0345] hi [0.0106, 0.0114, 0.0065]
+link_3_head: merged hull (178 faces)
+  link_3_head: mass 0.05, visual bounds (link frame) lo [-0.0473, -0.0323, -0.0188] hi [0.0326, 0.0267, 0.0188]
+link_4_nozzle: merged hull (36 faces)
+  link_4_nozzle: mass 0.005, visual bounds (link frame) lo [-0.0073, -0.0081, -0.0059] hi [0.0082, 0.0099, 0.0059]
+  joint_2_to_3: revolute link_3_head -> link_2_handle limits [0, 0.3927] effort 5 damping 0.02 friction 0.01
+  joint_3_to_1: fixed link_1_container -> link_3_head
+  joint_4_to_3: fixed link_3_head -> link_4_nozzle

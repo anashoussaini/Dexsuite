@@ -1,0 +1,18 @@
+description: Tiny rollout preset for wiring checks and CI-style smoke runs.
+config:
+  experiment:
+    render_video: false
+    video_skip: 1
+    rollout:
+      enabled: true
+      n: 1
+      horizon: 10
+      rate: 1
+      warmstart: 0
+      terminate_on_success: true
+rollout_args:
+  n_rollouts: 1
+  horizon: 10
+  video_skip: 1
+  camera_names:
+    - front

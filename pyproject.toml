@@ -1,0 +1,235 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dexsuite"
+version = "0.1.1"
+description = "DexSuite: one framework for dexterous manipulation across arms, hands and tasks, on Genesis."
+readme = "scripts/packaging/README_pypi.md"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_LICENSES.md"]
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "genesis-world==0.4.3",
+    "mink",
+    "quadprog",          # the QP solver of the default pose controllers (mink via qpsolvers)
+    "pynput",
+    "pyyaml",
+    "cattrs",
+    "gymnasium",
+    "numpy",
+]
+
+[project.urls]
+Homepage = "https://dexsuiteorg.github.io/"
+Documentation = "https://dexsuite.readthedocs.io/"
+Repository = "https://github.com/anashoussaini/Dexsuite"
+Datasets = "https://huggingface.co/dexsuite"
+
+[project.optional-dependencies]
+# Optional device backends (teleoperation / data collection).
+# Install with: `pip install "dexsuite[spacemouse]"`, etc.
+spacemouse = [
+    "evdev; platform_system == 'Linux'",
+    "hidapi; platform_system != 'Linux'",
+]
+datasets = ["h5py", "lerobot==0.4.4"]   # LeRobot recording + push to the Hub (the logger uses 0.4.4 internals), HDF5 export
+vive = ["openvr", "pyzmq"]          # SteamVR in-process, or poses published over ZMQ
+manus = ["websockets"]
+devices = [
+    "evdev; platform_system == 'Linux'",
+    "hidapi; platform_system != 'Linux'",
+    "openvr",
+    "pyzmq",
+    "websockets",
+]
+all = ["dexsuite[datasets,devices]"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["dexsuite*"]
+exclude = [
+    "dexsuite.agents*",
+]
+namespaces = false
+
+# --- Ruff: formatter + linter ---
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+
+[tool.ruff.lint]
+# E/F = pycodestyle/pyflakes
+# I   = isort (import sorting)
+# N   = pep8-naming
+# D   = pydocstyle (for docstrings)
+# --- Stricter Rules for Best Practices ---
+# B   = flake8-bugbear (finds likely bugs and design problems)
+# BLE = flake8-blind-except (avoid swallowing broad exceptions)
+# C4  = flake8-comprehensions (encourages modern comprehensions)
+# A   = flake8-builtins (prevents shadowing built-in names)
+# SIM = flake8-simplify (suggests simplifications)
+# UP  = pyupgrade (helps upgrade syntax to newer Python versions)
+# S   = flake8-bandit (security linter)
+# C90 = mccabe (checks for complexity)
+# DTZ = flake8-datetimez (timezone-safe datetimes)
+# FBT = flake8-boolean-trap (avoid unclear boolean call sites)
+# G   = flake8-logging-format (safer logging calls)
+# LOG = flake8-logging (logging anti-patterns)
+# NPY = NumPy-specific checks
+# PERF = perflint (common performance footguns)
+# PIE = flake8-pie (misc cleanup and correctness checks)
+# PL  = Pylint-derived checks
+# RET = flake8-return (simpler return flow)
+# TID = flake8-tidy-imports (import hygiene)
+select = [
+    "A",
+    "ARG",
+    "B",
+    "BLE",
+    "C4",
+    "C90",
+    "COM",
+    "D",
+    "DTZ",
+    "E",
+    "ERA",
+    "F",
+    "FBT",
+    "G",
+    "I",
+    "ICN",
+    "ISC",
+    "LOG",
+    "N",
+    "NPY",
+    "PERF",
+    "PIE",
+    "PL",
+    "PTH",
+    "Q",
+    "RET",
+    "RSE",
+    "RUF",
+    "S",
+    "SIM",
+    "TID",
+    "TRY",
+    "UP",
+]
+
+ignore = [
+    "COM812",   # handled by Ruff formatter; the lint rule conflicts with format
+    "E501",     # handled by formatter/readability; long strings often clearer unwrapped
+    "FBT001",   # public robotics APIs legitimately expose boolean options
+    "FBT002",   # same as above for boolean defaults
+    "PLC0415",  # local imports are used to avoid circular imports in factories
+    "PLR0913",  # robotics constructors naturally group hardware/config options
+    "PLR2004",  # tensor dimensions and protocol indexes are often clearer inline
+    "TRY003",   # local error messages are clearer than many tiny exception classes
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["dexsuite"]
+combine-as-imports = true
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "double"
+multiline-quotes = "double"
+docstring-quotes = "double"
+avoid-escape = true
+
+[tool.ruff.lint.flake8-import-conventions.aliases]
+"numpy" = "np"
+"pandas" = "pd"
+"matplotlib.pyplot" = "plt"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401"]
+"tests/**" = ["D","S101","T20"]
+"scripts/**" = ["T20"]
+"scripts/imitation_learning/robomimic/train.py" = [
+    "BLE001",  # top-level training wrapper prints full failure tracebacks
+    "C901",
+    "D",
+    "N812",    # robomimic convention imports TorchUtils-style modules
+    "PLR0911",
+    "PLR0912",
+    "PLR0915",
+]
+"scripts/imitation_learning/robomimic/custom_algorithms/act*.py" = [
+    # ACT kept exactly as it trained the paper's ACT results (act.py, act_config.py, act_nets.py)
+    "A002",
+    "ARG001",
+    "ARG002",
+    "C408",
+    "D",
+    "FBT003",
+    "I001",
+    "N806",
+    "N812",    # robomimic convention imports TorchUtils-style modules
+    "PLR0402",
+    "PLR0915",
+    "PLR0917",
+    "Q000",
+    "RET504",
+    "RUF003",
+    "S101",
+]
+"scripts/imitation_learning/robomimic/custom_algorithms/dataset_action_keys_patch.py" = [
+    "UP032",   # mirrors robomimic's own get_dataset_for_ep
+]
+"scripts/imitation_learning/robomimic/train_auto_until_success.py" = [
+    "BLE001",
+    "C901",
+    "D",
+    "PLR0911",
+    "PLR0912",
+    "PLR0915",
+]
+"scripts/imitation_learning/robomimic/utils/config_builder.py" = [
+    "D",
+    "PLR0911",
+]
+"scripts/imitation_learning/robomimic/utils/config_store.py" = [
+    "D",
+    "TRY004",
+]
+"scripts/imitation_learning/robomimic/utils/converter.py" = [
+    "BLE001",  # backend fallback probes several optional video stacks
+    "C901",
+    "D",
+    "PERF203",
+    "PLR0911",
+    "PLR0912",
+    "PLR0915",
+    "S110",
+    "TRY300",
+]
+"scripts/imitation_learning/robomimic/utils/obs_profiles.py" = [
+    "D",
+]
+"scripts/imitation_learning/robomimic/utils/env_dexsuite.py" = [
+    # EnvDexsuite kept exactly as the paper's rollouts used it
+    "ARG002",
+    "C408",
+    "C901",
+    "D",
+    "I001",
+    "N806",
+    "N812",    # follows robomimic's EnvBase-as-EB naming convention
+]
+"scripts/imitation_learning/robomimic/utils/rollout_env.py" = [
+    "D",
+    "N812",    # follows robomimic's FileUtils/TensorUtils naming convention
+]

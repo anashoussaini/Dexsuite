@@ -1,0 +1,29 @@
+<mujoco model="hot_plate">
+  <default>
+    <default class="visual">
+      <!-- visual meshes don't collide -->
+      <geom type="mesh" group="2" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <!-- collisions use a box + friction -->
+      <geom type="box" group="3" friction="1.0 0.02 0.001"/>
+    </default>
+  </default>
+
+  <asset>
+    <texture  name="hot_plate" type="2d" file="hot_plate.png"/>
+    <material name="material_0" texture="hot_plate" specular="0.0" shininess="0.5"/>
+    <!-- scale shrinks the OBJ (e.g., from ~meters to 0.30m-wide if that matched your earlier calc) -->
+    <mesh name="hot_plate" file="hot_plate.obj" scale="0.005 0.005 0.005"/>
+  </asset>
+
+  <worldbody>
+    <!-- FIXED: no joint on this body -->
+    <body name="hot_plate" pos="0 0 0">
+      <!-- textured visual -->
+      <geom class="visual" material="material_0" mesh="hot_plate"/>
+      <!-- single box collider (half-extents) -->
+      <geom class="collision" type="box" size="0.150 0.130 0.0025" pos="0 0 0.001943"/>
+    </body>
+  </worldbody>
+</mujoco>

@@ -1,0 +1,83 @@
+cameras:
+  default_names:
+    - front
+    - wrist
+
+tasks:
+  lift:
+    low_dim:
+      - state_manipulator_eef_pos
+      - state_gripper_qpos
+      - state_other_cube_pos
+      - state_other_target_pos
+
+  reach:
+    low_dim:
+      - state_manipulator_eef_pos
+      - state_gripper_qpos
+      - state_other_target_pos
+
+  push:
+    low_dim:
+      - state_manipulator_eef_pos
+      - state_gripper_qpos
+      - state_other_cube_pos
+      - state_other_goal_pos
+
+  pick_place:
+    low_dim:
+      - state_manipulator_eef_pos
+      - state_gripper_qpos
+      - state_other_cube_pos
+      - state_other_goal_pos
+
+  stack:
+    low_dim:
+      - state_manipulator_eef_pos
+      - state_gripper_qpos
+      - state_other_cube_a_pos
+      - state_other_cube_b_pos
+      - state_other_cube_c_pos
+
+  pick_place_fruit:
+    low_dim:
+      - state_manipulator_eef_pos
+      - state_gripper_qpos
+      - state_other_apple_pos
+      - state_other_lemon_pos
+      - state_other_bowl_pos
+
+  pick_place_mug:
+    low_dim:
+      - state_manipulator_eef_pos
+      - state_gripper_qpos
+      - state_other_mug_pos
+      - state_other_rack_pos
+
+  pick_place_pan:
+    low_dim:
+      - state_manipulator_eef_pos
+      - state_gripper_qpos
+      - state_other_pan_pos
+      - state_other_pan_vel
+      - state_other_mat_top_z
+
+  drill_to_point:
+    low_dim:
+      - state_manipulator_eef_pos
+      - state_manipulator_qvel
+      - state_gripper_qpos
+      - state_other_drill_pos
+      - state_other_drill_tip_pos
+      - state_other_target_pos
+
+  bimanual_stack_mid_air:
+    low_dim:
+      - state_right_manipulator_eef_pos
+      - state_right_manipulator_qvel
+      - state_right_gripper_qpos
+      - state_left_manipulator_eef_pos
+      - state_left_manipulator_qvel
+      - state_left_gripper_qpos
+      - state_other_cube_a_pos
+      - state_other_cube_b_pos

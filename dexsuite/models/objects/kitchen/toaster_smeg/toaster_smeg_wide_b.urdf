@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- slot variant wide_b (2026-10-05): collision walls only, visual mesh unchanged; big: slot |y| 0.0010..0.0370 (3.6 cm, 5.4 cm at scale 1.5) -->
+<robot name="toaster_smeg">
+  <link name="link_1_base">
+    <inertial>
+      <origin xyz="0.00377708 -8.46564e-07 -0.00232866" rpy="0 0 0" />
+      <mass value="1.5" />
+      <inertia ixx="0.00316256" ixy="4.47272e-07" ixz="-1.32815e-05" iyy="0.00526351" iyz="2.37043e-07" izz="0.0048367" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/1_base__M_Plastico.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/1_base__M_Intern.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/1_base__M_CROMADO.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.00415 0 -0.01925" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0923 0.1196 0.0851" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.07475 0 -0.0008" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0489 0.1196 0.122" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.0698 0 -0.0309" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0556 0.1196 0.0618" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.0631 0 0.0301" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0422 0.1196 0.0602" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.00415 0.0484 0.04175" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0923 0.0228 0.0369" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.00415 -0.0484 0.04175" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0923 0.0228 0.0369" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.00415 0 0.04175" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0923 0.002 0.0369" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link_4_rotary_dial">
+    <inertial>
+      <origin xyz="-1.1e-07 3.75696e-07 8.61063e-08" rpy="0 0 0" />
+      <mass value="0.02" />
+      <inertia ixx="2.17324e-06" ixy="-8.54768e-25" ixz="-1.26792e-23" iyy="1.22915e-06" iyz="-1.77025e-19" izz="1.22915e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0.092380 -0.000000 0.023293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/4_rotary_dial__M_CROMADO.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.092380 -0.000000 0.023293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/4_rotary_dial__M_CROMADO.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link_5_lever">
+    <inertial>
+      <origin xyz="-0.0861695 3.7608e-07 0.0524122" rpy="0 0 0" />
+      <mass value="0.02" />
+      <inertia ixx="5.0782e-07" ixy="-3.27563e-14" ixz="5.54194e-07" iyy="1.68827e-06" iyz="1.36597e-14" izz="1.42867e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/5_lever__M_CROMADO.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/5_lever__M_CROMADO.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_4_to_1" type="revolute">
+    <parent link="link_1_base" />
+    <child link="link_4_rotary_dial" />
+    <origin xyz="-0.09238010418976009 3.762795154213825e-07 -0.023292913586055543" rpy="0 0 0" />
+    <axis xyz="1.0 0.0 0.0" />
+    <limit lower="-3.141592653589793" upper="3.141592653589793" effort="5" velocity="5.0" />
+    <dynamics damping="0.05" friction="0.05" />
+  </joint>
+  <joint name="joint_5_to_1" type="prismatic">
+    <parent link="link_1_base" />
+    <child link="link_5_lever" />
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+    <axis xyz="0.0 6.123233995736766e-17 1.0" />
+    <limit lower="-0.054" upper="0" effort="100" velocity="5.0" />
+    <dynamics damping="2" friction="2" />
+  </joint>
+</robot>

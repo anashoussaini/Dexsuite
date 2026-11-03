@@ -1,0 +1,26 @@
+description: Behavior cloning recipe with sensors and encoders selected by train.py.
+algo_name: bc
+no_images: true
+config:
+  train:
+    num_data_workers: 0
+    hdf5_cache_mode: low_dim
+    seq_length: 1
+    frame_stack: 1
+    dataset_keys:
+      - actions
+    batch_size: 100
+  algo:
+    actor_layer_dims:
+      - 1024
+      - 1024
+    gaussian:
+      enabled: false
+    gmm:
+      enabled: false
+    vae:
+      enabled: false
+    rnn:
+      enabled: false
+    transformer:
+      enabled: false

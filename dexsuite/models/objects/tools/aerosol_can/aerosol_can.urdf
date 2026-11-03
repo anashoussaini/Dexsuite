@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="aerosol_can">
+  <link name="link_1_container">
+    <inertial>
+      <origin xyz="-0.000194107 0.000189907 -0.045" rpy="0 0 0" />
+      <mass value="2.31" />
+      <inertia ixx="0.00855092" ixy="-1.51181e-07" ixz="-1.21911e-05" iyy="0.00855048" iyz="1.22144e-05" izz="0.00253329" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/1_container__Layer_3_mtl.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/1_container__Layer_4_mtl.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/1_container__Layer_2_mtl.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_1_container.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link_2_head">
+    <inertial>
+      <origin xyz="0.000238852 0.000849216 0.0968153" rpy="0 0 0" />
+      <mass value="0.02" />
+      <inertia ixx="4.69303e-06" ixy="-8.01037e-10" ixz="-2.78854e-08" iyy="4.69314e-06" iyz="-5.71949e-09" izz="2.144e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/2_head__Layer_1_mtl.obj" scale="1.3 1.3 1" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/2_head__Layer_5_mtl.obj" scale="1.3 1.3 1" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/2_head__Layer_7_mtl.obj" scale="1.3 1.3 1" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="collision/link_2_head.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_2_to_1" type="prismatic">
+    <parent link="link_1_container" />
+    <child link="link_2_head" />
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+    <axis xyz="0.0 -6.123233995736766e-17 -1.0" />
+    <limit lower="0" upper="0.009" effort="20" velocity="5.0" />
+    <dynamics damping="2" friction="0.2" />
+  </joint>
+</robot>

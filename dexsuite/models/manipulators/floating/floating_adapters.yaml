@@ -1,0 +1,25 @@
+# The gantry has no flange geometry, so every mount is invisible and gripper_pos is zero: the hand root IS
+# the `attachment` link (eef_pos/eef_quat == hand base, what a tracker on a handheld rig measures).
+# gripper_quat carries the hand's home orientation instead of the hinges (which rest at zero), reproducing
+# the Franka + elbow-mount convention at the Franka home pose: Sharpa +X (palm normal) -> world -Z,
+# +Z (fingers) -> world +X, +Y (thumb) -> world +Y (a +90 degree rotation about Y).
+sharpa:
+  mount_type : invisible
+  gripper_pos  : [0.0, 0.0, 0.0]
+  gripper_quat : [0.7071068, 0.0, 0.7071068, 0.0]
+
+sharpa_right:
+  mount_type : invisible
+  gripper_pos  : [0.0, 0.0, 0.0]
+  gripper_quat : [0.7071068, 0.0, 0.7071068, 0.0]
+
+# Allegro at the pose the Franka home + franka_adapters.yaml give it (0.05 m forward, 0.035 m below the wrist).
+allegro:
+  mount_type : invisible
+  gripper_pos  : [0.05, 0.0, -0.035]
+  gripper_quat : [0.0, 0.7071068, 0.0, 0.7071068]
+
+allegro_right:
+  mount_type : invisible
+  gripper_pos  : [0.05, 0.0, -0.035]
+  gripper_quat : [0.0, 0.7071068, 0.0, 0.7071068]

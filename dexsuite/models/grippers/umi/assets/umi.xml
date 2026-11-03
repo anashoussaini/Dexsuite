@@ -1,0 +1,144 @@
+<mujoco model="umi tactile gripper">
+  <compiler angle="radian" meshdir="." autolimits="true"/>
+  <option integrator="implicitfast"/>
+
+    <default>
+      <default class="franka_hand">
+        <material specular="0.5" shininess="0.25"/>
+        <joint armature="0.1" damping="1" axis="0 1 0" type="slide"/>
+        <general dyntype="none" biastype="affine" forcerange="-300 300"/>
+      </default>
+    <default class="visual">
+      <geom contype="0" conaffinity="0" group="2"/>
+    </default>
+    <default class="collision">
+      <geom contype="1" conaffinity="1" group="3"/>
+    </default>
+  </default>
+
+  <asset>
+    <material class="franka_hand" name="white" rgba="1 1 1 1"/>
+    <material class="franka_hand" name="off_white" rgba="0.901961 0.921569 0.929412 1"/>
+    <material class="franka_hand" name="black" rgba="0.25 0.25 0.25 1"/>
+    <material class="franka_hand" name="pad_left" rgba="0.95 0.45 0.10 1"/>
+    <material class="franka_hand" name="pad_right" rgba="0.95 0.45 0.10 1"/>
+
+    <mesh name="hand_c" file="../../../manipulators/franka/assets/assets/hand.stl"/>
+    <mesh name="hand_0" file="../../../manipulators/franka/assets/assets/hand_0.obj"/>
+    <mesh name="hand_1" file="../../../manipulators/franka/assets/assets/hand_1.obj"/>
+    <mesh name="hand_2" file="../../../manipulators/franka/assets/assets/hand_2.obj"/>
+    <mesh name="hand_3" file="../../../manipulators/franka/assets/assets/hand_3.obj"/>
+    <mesh name="hand_4" file="../../../manipulators/franka/assets/assets/hand_4.obj"/>
+
+    <mesh
+      name="aloha_tip"
+      file="gripper.obj"
+      scale="0.001 0.001 0.001"
+    />
+    <mesh name="aloha_pad" file="aloha_flat_pad.obj"/>
+  </asset>
+
+  <worldbody>
+    <body name="hand" childclass="franka_hand" quat="0 0 0 1">
+      <freejoint/>
+      <inertial mass="0.73" pos="-0.01 0 0.03" diaginertia="0.001 0.0025 0.0017"/>
+
+      <geom type="mesh" mesh="hand_0" material="off_white" class="visual"/>
+      <geom type="mesh" mesh="hand_1" material="black" class="visual"/>
+      <geom type="mesh" mesh="hand_2" material="black" class="visual"/>
+      <geom type="mesh" mesh="hand_3" material="white" class="visual"/>
+      <geom type="mesh" mesh="hand_4" material="off_white" class="visual"/>
+      <geom type="mesh" mesh="hand_c" class="collision"/>
+
+      <body name="left_finger" pos="0 0 0.0534">
+        <inertial mass="0.034796" pos="0.135 0 0.0125" diaginertia="2.433e-5 1.255e-5 1.417e-5"/>
+        <joint name="finger_joint1" range="0 0.04"/>
+
+        <body name="left_aloha_frame" quat="0.70710678 0 -0.70710678 0">
+          <geom
+            type="mesh"
+            mesh="aloha_tip"
+            pos="0.135 0 0.0125"
+            quat="0.70710678 0 0 0.70710678"
+            material="off_white"
+            class="visual"
+          />
+          <geom
+            type="mesh"
+            mesh="aloha_tip"
+            pos="0.135 0 0.0125"
+            quat="0.70710678 0 0 0.70710678"
+            class="collision"
+          />
+
+          <body name="left_elastomer" pos="0.10 0.0012 0" quat="0.70710678 0 -0.70710678 0">
+            <inertial mass="0.001" pos="0 0 0" diaginertia="1e-6 1e-6 1e-6"/>
+            <geom type="mesh" mesh="aloha_pad" material="pad_left" class="visual"/>
+            <geom type="mesh" mesh="aloha_pad" class="collision"/>
+          </body>
+        </body>
+      </body>
+
+      <body name="right_finger" pos="0 0 0.0534">
+        <inertial mass="0.034796" pos="0.135 0 -0.0125" diaginertia="2.433e-5 1.255e-5 1.417e-5"/>
+        <joint name="finger_joint2" range="-0.04 0"/>
+
+        <body name="right_aloha_frame" quat="0.70710678 0 -0.70710678 0">
+          <geom
+            type="mesh"
+            mesh="aloha_tip"
+            pos="0.135 0 -0.0125"
+            quat="0 0.70710678 -0.70710678 0"
+            material="off_white"
+            class="visual"
+          />
+          <geom
+            type="mesh"
+            mesh="aloha_tip"
+            pos="0.135 0 -0.0125"
+            quat="0 0.70710678 -0.70710678 0"
+            class="collision"
+          />
+
+          <body name="right_elastomer" pos="0.10 -0.0012 0" quat="0 0.70710678 0 -0.70710678">
+            <inertial mass="0.001" pos="0 0 0" diaginertia="1e-6 1e-6 1e-6"/>
+            <geom type="mesh" mesh="aloha_pad" material="pad_right" class="visual"/>
+            <geom type="mesh" mesh="aloha_pad" class="collision"/>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <contact>
+    <exclude body1="hand" body2="left_finger"/>
+    <exclude body1="hand" body2="right_finger"/>
+    <exclude body1="left_finger" body2="left_elastomer"/>
+    <exclude body1="right_finger" body2="right_elastomer"/>
+    <exclude body1="left_finger" body2="right_finger"/>
+    <exclude body1="left_finger" body2="right_elastomer"/>
+    <exclude body1="right_finger" body2="left_elastomer"/>
+    <exclude body1="left_elastomer" body2="right_elastomer"/>
+  </contact>
+
+  <actuator>
+    <general
+      class="franka_hand"
+      name="left_finger_actuator"
+      joint="finger_joint1"
+      forcerange="-300 300"
+      ctrlrange="0 0.04"
+      gainprm="300 0 0"
+      biasprm="0 -300 -30"
+    />
+    <general
+      class="franka_hand"
+      name="right_finger_actuator"
+      joint="finger_joint2"
+      forcerange="-300 300"
+      ctrlrange="-0.04 0"
+      gainprm="300 0 0"
+      biasprm="0 -300 -30"
+    />
+  </actuator>
+</mujoco>

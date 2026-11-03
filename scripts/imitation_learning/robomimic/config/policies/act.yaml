@@ -1,0 +1,34 @@
+description: >-
+  Action Chunking Transformer recipe with sensors selected by train.py. ACT conditions each chunk on the
+  newest observation only and trains on L1 + kl_weight x KL. act_img is the paper's image protocol.
+algo_name: act
+no_images: true
+config:
+  train:
+    num_data_workers: 0
+    hdf5_cache_mode: low_dim
+    hdf5_load_next_obs: false
+    seq_length: 8
+    frame_stack: 1
+    dataset_keys:
+      - actions
+    batch_size: 64
+  algo:
+    optim_params:
+      policy:
+        optimizer_type: adamw
+        learning_rate:
+          initial: 0.00001
+    horizon:
+      observation_horizon: 1
+      action_horizon: 8
+    transformer:
+      embed_dim: 512
+      num_layers: 6
+      num_heads: 8
+      emb_dropout: 0.1
+      attn_dropout: 0.1
+      block_output_dropout: 0.1
+      sinusoidal_embedding: false
+      activation: gelu
+      nn_parameter_for_timesteps: true

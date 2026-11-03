@@ -1,0 +1,30 @@
+name: sawyer
+
+single:
+  single:
+    pos: [0.0, 0.0, 0.0]
+    yaw_rad: 0.0
+
+side_by_side:
+  left:
+    pos: [0.0, 0.35, 0.0]
+    yaw_rad: 0.0
+  right:
+    pos: [0.0, -0.35, 0.0]
+    yaw_rad: 0.0
+
+face_to_face:
+  left:
+    pos: [0.3, 0.7, 0.0]
+    yaw_deg: -90.0
+  right:
+    pos: [0.3, -0.7, 0.0]
+    yaw_deg: 90.0
+
+right_angle:
+  left:
+    pos: [0.2, 0.6, 0.0]
+    yaw_deg: -45.0
+  right:
+    pos: [0.2, -0.6, 0.0]
+    yaw_deg: 45.0

@@ -1,0 +1,18 @@
+description: Full rollout evaluation for serious training runs.
+config:
+  experiment:
+    render_video: true
+    video_skip: 5
+    rollout:
+      enabled: true
+      n: 50
+      horizon: 400
+      rate: 50
+      warmstart: 0
+      terminate_on_success: true
+rollout_args:
+  n_rollouts: 50
+  horizon: 400
+  video_skip: 5
+  camera_names:
+    - front

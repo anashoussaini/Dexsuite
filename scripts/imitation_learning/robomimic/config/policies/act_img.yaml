@@ -1,0 +1,48 @@
+description: >-
+  Image ACT recipe matched to the paper's image diffusion runs: same data budget (epochs x 100 steps,
+  batch 100; the table uses 300 epochs with 50-episode rollouts + checkpoints every 50), same augmentation (196 px random crop on 224 px renders, centre crop at eval), front camera +
+  proprio via --sensors cameras --obs <yaml>. Chunk (--action-horizon) and obs horizon (--obs-horizon, 1) come
+  from the command line; train.frame_stack / seq_length follow them automatically.
+algo_name: act
+no_images: false
+config:
+  experiment:
+    epoch_every_n_steps: 100
+    rollout:
+      enabled: true
+      n: 50
+      horizon: 400
+      rate: 50
+      warmstart: 0
+      terminate_on_success: true
+    save:
+      enabled: true
+      every_n_epochs: 50
+      on_best_rollout_success_rate: true
+  train:
+    num_data_workers: 0
+    hdf5_cache_mode: all
+    hdf5_load_next_obs: false
+    dataset_keys:
+      - actions
+    batch_size: 100
+    num_epochs: 300
+  algo:
+    optim_params:
+      policy:
+        optimizer_type: adamw
+        learning_rate:
+          initial: 0.0001
+    horizon:
+      observation_horizon: 1
+      action_horizon: 8
+    backbone:
+      pretrained: true
+      lr_multiplier: 0.1
+    augmentation:
+      crop_height: 196
+      crop_width: 196
+      color_jitter: false
+    temporal_ensemble:
+      enabled: true
+      k: 0.01

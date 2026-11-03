@@ -1,0 +1,31 @@
+reach_franka_robotiq:
+  repo_id: dexsuite/reach_franka_robotiq
+  task: reach
+  default_sensors: state
+  h5_basename: reach_franka_robotiq
+  action_normalization: dataset
+  no_images: true
+
+pick_and_place_auto:
+  repo_id: dexsuite/pick_and_place_auto
+  task: pick_place
+  default_sensors: state
+  h5_basename: pick_and_place_auto
+  action_normalization: dataset
+  no_images: true
+
+lift_auto:
+  repo_id: dexsuite/lift_auto
+  task: lift
+  default_sensors: state
+  h5_basename: lift_auto
+  action_normalization: dataset
+  no_images: true
+
+pick_place_pan_franka_allegro:
+  repo_id: dexsuite/pick_place_pan_franka_allegro
+  task: pick_place_pan
+  default_sensors: state
+  h5_basename: pick_place_pan_franka_allegro
+  action_normalization: dataset
+  no_images: true

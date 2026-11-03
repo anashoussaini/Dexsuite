@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mujoco model="frame_hook_frame_fixed">
+  <compiler angle="radian" coordinate="local"/>
+  <option gravity="0 0 -9.81"/>
+  <asset>
+    <material name="brass_like" rgba="0.78 0.62 0.28 1" specular="0.5" shininess="0.2"/>
+    <material name="dark_grip" rgba="0.13 0.13 0.13 1" specular="0.1" shininess="0.05"/>
+    <material name="steel_like" rgba="0.7 0.7 0.7 1" specular="0.6" shininess="0.25"/>
+  </asset>
+  <worldbody>
+    <body name="frame">
+      <!-- Origin is at the center of the vertical rod (inside solid geometry) -->
+      <joint name="frame_freejoint" type="free" damping="0.0005"/>
+      <geom name="frame_vertical_frame" type="box" pos="0 0 0" size="0.00375 0.00375 0.08625"
+            material="brass_like" density="500" solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="frame_horizontal_frame" type="box" pos="-0.04375 0 0.09" size="0.0475 0.00375 0.00375"
+            material="brass_like" density="500" solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="frame_hook_frame" type="box" pos="-0.0875 0 0.09975" size="0.00375 0.00375 0.006"
+            material="brass_like" density="500" solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="frame_grip_frame" type="box" pos="0 0 0.05625" size="0.0127 0.0127 0.03175"
+            rgba="0.13 0.13 0.13 1" density="500" friction="1 0.005 0.0001"
+            solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="frame_tip_cylinder" type="cylinder" pos="0 0 -0.09895" size="0.00325 0.0127"
+            rgba="0.7 0.7 0.7 1" density="500" solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <geom name="frame_tip_sphere" type="sphere" pos="0 0 -0.1307" size="0.00325"
+            rgba="0.7 0.7 0.7 1" density="500" solref="0.02 1" solimp="0.998 0.998 0.001"/>
+      <!-- Sites expected by ToolHang (names match robosuite: frame_*_site) -->
+      <site name="frame_hang_site" pos="-0.09125 0 0.09" size="0.002" rgba="1 0 0 1" type="sphere"/>
+      <site name="frame_mount_site" pos="0 0 -0.08625" size="0.002" rgba="0 1 0 1" type="sphere"/>
+      <site name="frame_intersection_site" pos="0 0 0.09" size="0.002" rgba="0 0 1 1" type="sphere"/>
+      <site name="frame_tip_site" pos="0 0 -0.1307" size="0.002" rgba="1 0 0 1" type="sphere"/>
+      <!-- Debug: shows body origin -->
+      <site name="frame_origin_site" pos="0 0 0" size="0.0015" rgba="1 1 0 1" type="sphere"/>
+    </body>
+  </worldbody>
+</mujoco>

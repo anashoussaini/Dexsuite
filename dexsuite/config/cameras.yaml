@@ -1,0 +1,120 @@
+static:
+  front:
+    pos: [1.3, 0.0, 0.5]
+    lookat: [0.0, 0.0, 0.0]
+    fov: 75
+    res: [224, 224]
+  overhead:
+    pos: [0.38, 0.0, 1.35]
+    lookat: [0.39, 0.0, 0.0]
+    fov: 75
+    res: [224, 224]
+  right_side:
+    pos: [0.5, -1.2, 0.6]
+    lookat: [0.5, 0.5, 0.0]
+    fov: 65
+    res: [224, 224]
+  left_side:
+    pos: [0.5, 1.3, 0.7]
+    lookat: [0.5, 0.5, 0.3]
+    fov: 65
+    res: [224, 224]
+  right_angled_front:
+    pos: [1.1, 1.5, 0.6]
+    lookat: [0.3, 0.0, 0.0]
+    fov: 65
+    res: [224, 224]
+  left_angled_front:
+    pos: [1.1, -1.5, 0.6]
+    lookat: [0.3, 0.0, 0.0]
+    fov: 65
+    res: [224, 224]
+  right_angled_back:
+    pos: [-0.4, 1.5, 0.6]
+    lookat: [0.4, 0.0, 0.0]
+    fov: 65
+    res: [224, 224]
+  left_angled_back:
+    pos: [-0.4, -1.5, 0.6]
+    lookat: [0.4, 0.0, 0.0]
+    fov: 65
+    res: [224, 224]
+
+dynamic:
+  wrist_cam:
+    fov: 60
+    res: [224, 224]
+    default:
+      pos_offset: [0.0, 0.14, 0.0]
+      quat_offset: [0.3466353, -0.938, 0.0, 0.0]
+    overrides:
+      robotiq:
+        pos_offset: [0.0, 0.14, 0.0]
+        quat_offset: [0.3466353, -0.938, 0.0, 0.0]
+      # Sharpa: the D405 of the real rig (a camera plate on the back of the hand), its depth optical frame expressed
+      # in right_hand_C_MC. Chain: plate at hand_to_cam_mount (0, 0, -0.066; rpy 0, -90 deg, 0 on the rig's
+      # right_hand_base) -> mount_to_camera (0.01545, 0, -0.09403) -> D405 optical (0.01085, 0.009, 0.021;
+      # rpy -90, 0, -90 deg), plus the 0.0295 m shift of this MJCF's root (flange included) vs the rig's root.
+      # Renderer camera frame (-z forward, +y up): looks along hand +Z (fingers), up = -X (back of hand).
+      # Alternatives: plate bolted directly on the Sharpa flange (yaw 0): pos_offset z 0.0173, same quat_offset;
+      # hole-pattern 45-degree plate yaw: quat_offset [0.0, 0.9238795, -0.3826834, 0.0], pos_offset [0.0453, 0.0580, z].
+      # D405 registered depth as recorded on the robot (1280x720, f 659.5 px): 16:9 at 224 rows, 57.3 deg vertical
+      # Square central view: preserve vertical FOV and square pixels, render directly at 224 x 224.
+      # Near 5 mm clears the housing front (~3.7 mm ahead of the optical origin).
+      # This is a rendering clip plane, not a physical depth-sensor range model.
+      sharpa:
+        pos_offset: [0.073, 0.009, -0.0102]
+        quat_offset: [0.0, 0.7071068, -0.7071068, 0.0]
+        fov: 57.3
+        res: [224, 224]
+        near: 0.005
+      sharpa_right:
+        pos_offset: [0.073, 0.009, -0.0102]
+        quat_offset: [0.0, 0.7071068, -0.7071068, 0.0]
+        fov: 57.3
+        res: [224, 224]
+        near: 0.005
+      allegro:
+        pos_offset: [0.0, 0.0, -0.21]
+        quat_offset: [-0.1830127, -0.6830127, 0.6830127, 0.1830127]
+      allegro_right:
+        pos_offset: [0.0, 0.0, -0.21]
+        quat_offset: [-0.1830127, -0.6830127, 0.6830127, 0.1830127]
+      allegro_left:
+        pos_offset: [0.0, 0.0, -0.21]
+        quat_offset: [-0.1830127, -0.6830127, 0.6830127, 0.1830127]
+      schunk:
+        pos_offset: [0.0, 0.14, -0.03]
+        quat_offset: [-0.1736482, 0.9848078, 0.0, 0.0]
+      dclaw:
+        pos_offset: [0.0, 0.14, -0.03]
+        quat_offset: [-0.1736482, 0.9848078, 0.0, 0.0]
+      leap_right:
+        pos_offset: [-0.2, 0.0, -0.03]
+        quat_offset: [0.6123724, 0.3535534, -0.3535534, -0.6123724]
+      leap_left:
+        pos_offset: [-0.2, -0.04, -0.03]
+        quat_offset: [0.6123724, 0.3535534, -0.3535534, -0.6123724]
+      inspire:
+        pos_offset: [0.0, 0.14, -0.03]
+        quat_offset: [-0.1736482, 0.9848078, 0.0, 0.0]
+      ability:
+        pos_offset: [0.0, 0.14, -0.07]
+        quat_offset: [-0.1736482, 0.9848078, 0.0, 0.0]
+      barrett:
+        pos_offset: [0.0, 0.14, -0.03]
+        quat_offset: [-0.1736482, 0.9848078, 0.0, 0.0]
+      shadow:
+        pos_offset: [0.0, 0.09, -0.05]
+      shadow_right:
+        pos_offset: [0.0, 0.09, -0.05]
+      shadow_left:
+        pos_offset: [0.0, 0.09, -0.05]
+      trossen_wx250s:
+        pos_offset: [0.0, 0.07, -0.03]
+      franka_with_gripper:
+        pos_offset: [0.0, 0.6, -0.03]
+      gen3:
+        pos_offset: [0.0, 0.0, 0.08]
+      ur5:
+        pos_offset: [0.0, 0.0, 0.15]

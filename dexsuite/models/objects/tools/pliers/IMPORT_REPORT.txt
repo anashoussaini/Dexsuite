@@ -1,0 +1,11 @@
+# pliers <- Artiverse pliers/3dw/ee3229daab48b2f3bfa59e044d401be9/urdf_w_collider/ee3229daab48b2f3bfa59e044d401be9.urdf
+  link_5_screw: mass 0.01, visual bounds (link frame) lo [-0.005, -0.0156, -0.0045] hi [0.005, -0.0056, 0.0045]
+link_6_leg: 6 CoACD piece(s), threshold 0.04
+  link_6_leg: mass 0.1, visual bounds (link frame) lo [-0.0569, -0.0853, -0.018] hi [0.0094, 0.106, 0.009]
+link_7_jaw: merged hull (158 faces)
+  link_7_jaw: mass 0.03, visual bounds (link frame) lo [-0.0117, -0.0845, -0.009] hi [0.0225, 0.0115, 0.0]
+link_8_handle: 6 CoACD piece(s), threshold 0.04
+  link_8_handle: mass 0.1, visual bounds (link frame) lo [0.0017, 0.0045, -0.018] hi [0.0545, 0.1067, 0.009]
+  joint_6_to_5: fixed link_5_screw -> link_6_leg
+  joint_8_to_5: fixed link_5_screw -> link_8_handle
+  joint_7_to_8: fixed link_8_handle -> link_7_jaw

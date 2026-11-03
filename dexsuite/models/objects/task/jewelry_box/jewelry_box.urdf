@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="jewelry_box">
+  <link name="link_1_base">
+    <inertial>
+      <origin xyz="0 -5e-09 -0.0121933" rpy="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="0.00269201" ixy="6.17005e-20" ixz="-0" iyy="0.00565528" iyz="3.28393e-21" izz="0.00637576" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/1_base__material_0_24.obj" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.000000 -0.000000 -0.000000" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/1_base__material_2_24.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.0557" rpy="0 0 0" />
+      <geometry>
+        <box size="0.25 0.1562 0.0156" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.1172 0 -0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0156 0.1562 0.0938" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.1172 0 -0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0156 0.1562 0.0938" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.0703 -0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.2188 0.0156 0.0938" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.0703 -0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.2188 0.0156 0.0938" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link_2_lid">
+    <inertial>
+      <origin xyz="0.00253223 -0.0610387 0.00832356" rpy="0 0 0" />
+      <mass value="0.25" />
+      <inertia ixx="0.000488017" ixy="-6.59367e-06" ixz="-1.01213e-07" iyy="0.00125298" iyz="2.20418e-07" izz="0.00172906" />
+    </inertial>
+    <visual>
+      <origin xyz="0.002483 -0.060938 -0.045898" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="objs/2_lid__material_0_24.obj" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.00248282 -0.0609383 0.00880156" rpy="0 0 0" />
+      <geometry>
+        <box size="0.25 0.1562 0.0176" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_2_to_1" type="revolute">
+    <parent link="link_1_base" />
+    <child link="link_2_lid" />
+    <origin xyz="-0.0024828243021693046 0.060938332384584 0.04589843568728184" rpy="0 0 0" />
+    <axis xyz="-1.0 0.0 0.0" />
+    <limit lower="0.0" upper="1.5707963267948966" effort="20" velocity="5.0" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+</robot>
