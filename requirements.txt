@@ -1,0 +1,11 @@
+# Core dependencies, same as [project] dependencies in pyproject.toml.
+# Extras (LeRobot recording, teleop devices) are installed with pip install -e ".[all]".
+torch
+genesis-world==0.4.3
+mink
+quadprog
+pynput
+pyyaml
+cattrs
+gymnasium
+numpy
