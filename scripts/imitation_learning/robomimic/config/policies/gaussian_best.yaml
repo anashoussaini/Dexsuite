@@ -1,0 +1,31 @@
+description: Best BC-Gaussian recipe - MLP with unimodal Gaussian head + frame_stack=10 for temporal context.
+algo_name: bc
+no_images: true
+config:
+  train:
+    num_data_workers: 0
+    hdf5_cache_mode: low_dim
+    seq_length: 1
+    frame_stack: 10
+    dataset_keys:
+      - actions
+    batch_size: 100
+  algo:
+    actor_layer_dims:
+      - 1024
+      - 1024
+    gaussian:
+      enabled: true
+      fixed_std: false
+      init_std: 0.1
+      min_std: 0.0001
+      std_activation: softplus
+      low_noise_eval: true
+    gmm:
+      enabled: false
+    vae:
+      enabled: false
+    rnn:
+      enabled: false
+    transformer:
+      enabled: false

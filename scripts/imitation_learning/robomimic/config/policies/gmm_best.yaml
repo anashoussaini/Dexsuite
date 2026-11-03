@@ -1,0 +1,40 @@
+description: Best GMM recipe - BC-Transformer-GMM with future action chunking (45% pick_place, 55% push, 30% fruit).
+algo_name: bc
+no_images: true
+config:
+  train:
+    num_data_workers: 0
+    hdf5_cache_mode: low_dim
+    seq_length: 20
+    frame_stack: 1
+    dataset_keys:
+      - actions
+    batch_size: 64
+  algo:
+    actor_layer_dims: []
+    gaussian:
+      enabled: false
+    gmm:
+      enabled: true
+      num_modes: 5
+      min_std: 0.0001
+      std_activation: softplus
+      low_noise_eval: true
+    vae:
+      enabled: false
+    rnn:
+      enabled: false
+    transformer:
+      enabled: true
+      context_length: 10
+      embed_dim: 512
+      num_layers: 6
+      num_heads: 8
+      emb_dropout: 0.1
+      attn_dropout: 0.1
+      block_output_dropout: 0.1
+      sinusoidal_embedding: false
+      activation: gelu
+      supervise_all_steps: true
+      nn_parameter_for_timesteps: true
+      pred_future_acs: true

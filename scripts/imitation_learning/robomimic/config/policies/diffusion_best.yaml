@@ -1,0 +1,15 @@
+description: Best diffusion recipe - 16 pred / 8 exec chunking, obs_horizon 2 (70% pick_place, 70% push, 30% stack, 94% reach).
+algo_name: diffusion_policy
+no_images: true
+config:
+  train:
+    num_data_workers: 0
+    hdf5_cache_mode: low_dim
+    seq_length: 16
+    frame_stack: 2
+    batch_size: 100
+  algo:
+    horizon:
+      observation_horizon: 2
+      action_horizon: 8
+      prediction_horizon: 16
