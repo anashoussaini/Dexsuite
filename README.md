@@ -8,16 +8,20 @@
   <a href="https://dexsuiteorg.github.io/"><b>Website</b></a>&nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="https://dexsuite.readthedocs.io/"><b>Documentation</b></a>&nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="https://huggingface.co/dexsuite"><b>Datasets</b></a>&nbsp;&nbsp;·&nbsp;&nbsp;
-  <a href="#citation"><b>Paper</b></a> <sub>under review</sub>
+  <a href="https://arxiv.org/abs/2610.37799"><b>Paper</b></a>
 </p>
 
 <p align="center">
   <a href="https://pypi.org/project/dexsuite/"><img alt="PyPI" src="https://img.shields.io/pypi/v/dexsuite?style=flat-square&labelColor=24292f&color=289be4"></a>
+  <img alt="Status: beta" src="https://img.shields.io/badge/status-beta-e3a008?style=flat-square&labelColor=24292f">
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10+-289be4?style=flat-square&labelColor=24292f">
   <img alt="Genesis 0.4.3" src="https://img.shields.io/badge/simulator-Genesis_0.4.3-289be4?style=flat-square&labelColor=24292f">
   <img alt="Gymnasium API" src="https://img.shields.io/badge/API-Gymnasium-289be4?style=flat-square&labelColor=24292f">
   <a href="https://huggingface.co/dexsuite"><img alt="Datasets in LeRobot format" src="https://img.shields.io/badge/datasets-LeRobot-289be4?style=flat-square&labelColor=24292f"></a>
 </p>
+
+<p align="center"><sub>DexSuite is in beta: the API may still change before 1.0. Pin the version for reproducible work, and please
+<a href="https://github.com/anashoussaini/Dexsuite/issues">open an issue</a> if anything breaks.</sub></p>
 
 <p align="center">
   <img src="docs/readme/hero.webp" alt="A Sharpa hand picks up a spray can and paints the stencil, replayed from a recorded demonstration" width="560">

@@ -7,8 +7,13 @@
 <p align="center">
   <a href="https://dexsuiteorg.github.io/"><b>Website</b></a> ·
   <a href="https://dexsuite.readthedocs.io/"><b>Documentation</b></a> ·
-  <a href="https://huggingface.co/dexsuite"><b>Datasets</b></a>
+  <a href="https://huggingface.co/dexsuite"><b>Datasets</b></a> ·
+  <a href="https://arxiv.org/abs/2610.37799"><b>Paper</b></a> ·
+  <a href="https://github.com/anashoussaini/Dexsuite"><b>Code</b></a>
 </p>
+
+<p align="center"><sub>DexSuite is in beta: the API may still change before 1.0. Pin the version for reproducible work, and please
+<a href="https://github.com/anashoussaini/Dexsuite/issues">open an issue</a> if anything breaks.</sub></p>
 
 <p align="center">
   <img src="https://dexsuite.readthedocs.io/en/latest/_static/home/hero.webp" alt="A Sharpa hand picks up a spray can and paints the stencil" width="480">
