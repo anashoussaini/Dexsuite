@@ -34,29 +34,34 @@ _RENDER_BACKED_TESTS = {
     "test_all_modalities_shapes_and_dtypes",
     "test_camera_pack_names_and_modalities_persist_across_steps",
     "test_many_cameras_single_build_shapes_modalities_and_naming",
+    "test_freeing_one_env_keeps_the_other_envs_cameras",
 }
 
 
 @lru_cache(maxsize=1)
-def _offscreen_renderer_available() -> bool:
-    """Return whether Genesis can create an offscreen OpenGL context."""
+def _offscreen_renderer_unavailable() -> str | None:
+    """None when Genesis can create an offscreen OpenGL context, else the reason it cannot."""
     try:
         from genesis.ext import pyrender
 
+        from dexsuite.api import _lazy_init_genesis
+
+        _lazy_init_genesis(performance_mode=False)  # Genesis must be initialised before a renderer can be made
         platform = os.environ.get("PYOPENGL_PLATFORM", "egl")
         renderer = pyrender.OffscreenRenderer(
             pyopengl_platform=platform,
             seg_node_map={},
         )
         renderer.delete()
-    except Exception:
-        return False
-    return True
+    except Exception as exc:  # noqa: BLE001 - any failure means no renderer; say which
+        return f"{type(exc).__name__}: {exc}"
+    return None
 
 
 def pytest_runtest_setup(item) -> None:
     if item.name not in _RENDER_BACKED_TESTS:
         return
-    if not _offscreen_renderer_available():
-        pytest.skip("Genesis offscreen renderer is unavailable in this environment.")
+    reason = _offscreen_renderer_unavailable()
+    if reason is not None:
+        pytest.skip(f"Genesis offscreen renderer is unavailable here ({reason}).")
 

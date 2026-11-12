@@ -14,6 +14,7 @@ import sys
 from dexsuite.core.registry import ENV_REG
 from dexsuite.options.builders import build_make_options, normalize_make_options
 from dexsuite.utils import get_device
+from dexsuite.utils.egl_teardown import patch_genesis_egl_teardown
 
 _GENESIS_STATE = {"ready": False}
 
@@ -62,6 +63,11 @@ def _lazy_init_genesis(*, performance_mode: bool, precision: str = "32") -> None
     if _GENESIS_STATE["ready"]:
         if precision != _GENESIS_STATE.get("precision", "32"):
             raise RuntimeError("Genesis precision cannot change within a process; start a new worker.")
+        return
+    patch_genesis_egl_teardown()
+    if gs._initialized:  # initialised by the caller (gs.init before ds.make): use it as is
+        _GENESIS_STATE["ready"] = True
+        _GENESIS_STATE["precision"] = precision
         return
     dev = get_device()
     gs.init(

@@ -306,9 +306,18 @@ class BaseEnv(gym.Env):
         )
 
     def close(self) -> None:
-        """Close the interactive viewer if it is running."""
+        """Stop the viewer and release the Genesis scene, renderer included.
+
+        The scene is torn down here rather than whenever the garbage collector gets to it: an old env's renderer
+        freed later terminates the EGL display that a live env's cameras still use (EGL_NOT_INITIALIZED). Safe to
+        call more than once; the env cannot be used after it.
+        """
+        if getattr(self, "_closed", False):
+            return
+        self._closed = True
         if self.scene.viewer:
             self.scene.viewer.stop()
+        self.scene.destroy()
 
     def _scene_step_with_robot_hooks(self) -> None:
         before = getattr(self.robot, "before_scene_step", None)
