@@ -18,7 +18,7 @@ from __future__ import annotations
 import importlib
 import pkgutil
 
-__version__ = "0.1.1"
+__version__ = "0.1.1rc3"
 # ----------------------------------------------------------------------
 # public surface (core functions)
 # ----------------------------------------------------------------------

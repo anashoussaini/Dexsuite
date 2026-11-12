@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dexsuite"
-version = "0.1.1"
+version = "0.1.1rc3"
 description = "DexSuite: one framework for dexterous manipulation across arms, hands and tasks, on Genesis."
 readme = "scripts/packaging/README_pypi.md"
 license = "MIT"
