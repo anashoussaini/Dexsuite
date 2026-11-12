@@ -91,13 +91,25 @@ class _SharpaBase(GripperModel):
 
 @register_gripper("sharpa_right")
 @register_gripper("sharpa")
-@register_gripper("sharpa_fardexbot")  # the name the recorded Sharpa datasets use: the same hand
 class SharpaRight(_SharpaBase):
     """Represent the right Sharpa hand."""
 
     model_path: str = package_asset_path(
         __package__, "right_sharpa_wave_with_flange.xml"
     )
+    root_link: str = "right_hand_C_MC"
+    home_q, q_lo, q_hi, kp, kv = _joint_tables(model_path, "right")
+
+
+@register_gripper("sharpa_fardexbot")
+class SharpaFardexbotRight(_SharpaBase):
+    """Represent the right Sharpa hand carrying the fardexbox camera mount plate and the D405 body.
+
+    This is the hand the scripted Sharpa datasets were recorded with: the plain right hand plus the wrist-camera
+    mount, which adds 0.5 kg to the root link and collides with the scene.
+    """
+
+    model_path: str = package_asset_path(__package__, "right_sharpa_fardexbot.xml")
     root_link: str = "right_hand_C_MC"
     home_q, q_lo, q_hi, kp, kv = _joint_tables(model_path, "right")
 

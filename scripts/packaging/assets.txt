@@ -173,6 +173,9 @@ grippers/sharpa/assets/right_meshes/DP_visual_HB1_4F.STL
 grippers/sharpa/assets/right_meshes/MCP_VL.STL
 grippers/sharpa/assets/right_meshes/elastomer_HB1_4F.STL
 grippers/sharpa/assets/right_meshes/elastomer_HB1_TH.STL
+grippers/sharpa/assets/right_meshes/fardexbox_d405.STL
+grippers/sharpa/assets/right_meshes/fardexbox_mount_plate.STL
+grippers/sharpa/assets/right_meshes/fardexbox_quick_changer.STL
 grippers/sharpa/assets/right_meshes/flange_B.STL
 grippers/sharpa/assets/right_meshes/right_MCP_VL_visual.STL
 grippers/sharpa/assets/right_meshes/right_MP.STL
@@ -191,6 +194,7 @@ grippers/sharpa/assets/right_meshes/right_thumb_PP.STL
 grippers/sharpa/assets/right_meshes/right_thumb_PP_visual.STL
 grippers/sharpa/assets/right_meshes/wrist_B.STL
 grippers/sharpa/assets/right_meshes/wrist_collision.STL
+grippers/sharpa/assets/right_sharpa_fardexbot.xml
 grippers/sharpa/assets/right_sharpa_wave_with_flange.xml
 grippers/umi/assets/aloha_flat_pad.obj
 grippers/umi/assets/gripper.mtl

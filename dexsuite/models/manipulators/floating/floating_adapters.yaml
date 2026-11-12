@@ -13,6 +13,11 @@ sharpa_right:
   gripper_pos  : [0.0, 0.0, 0.0]
   gripper_quat : [0.7071068, 0.0, 0.7071068, 0.0]
 
+sharpa_fardexbot:
+  mount_type : invisible
+  gripper_pos  : [0.0, 0.0, 0.0]
+  gripper_quat : [0.7071068, 0.0, 0.7071068, 0.0]
+
 # Allegro at the pose the Franka home + franka_adapters.yaml give it (0.05 m forward, 0.035 m below the wrist).
 allegro:
   mount_type : invisible

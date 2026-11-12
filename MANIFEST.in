@@ -182,6 +182,9 @@ include dexsuite/models/grippers/sharpa/assets/right_meshes/DP_visual_HB1_4F.STL
 include dexsuite/models/grippers/sharpa/assets/right_meshes/MCP_VL.STL
 include dexsuite/models/grippers/sharpa/assets/right_meshes/elastomer_HB1_4F.STL
 include dexsuite/models/grippers/sharpa/assets/right_meshes/elastomer_HB1_TH.STL
+include dexsuite/models/grippers/sharpa/assets/right_meshes/fardexbox_d405.STL
+include dexsuite/models/grippers/sharpa/assets/right_meshes/fardexbox_mount_plate.STL
+include dexsuite/models/grippers/sharpa/assets/right_meshes/fardexbox_quick_changer.STL
 include dexsuite/models/grippers/sharpa/assets/right_meshes/flange_B.STL
 include dexsuite/models/grippers/sharpa/assets/right_meshes/right_MCP_VL_visual.STL
 include dexsuite/models/grippers/sharpa/assets/right_meshes/right_MP.STL
@@ -200,6 +203,7 @@ include dexsuite/models/grippers/sharpa/assets/right_meshes/right_thumb_PP.STL
 include dexsuite/models/grippers/sharpa/assets/right_meshes/right_thumb_PP_visual.STL
 include dexsuite/models/grippers/sharpa/assets/right_meshes/wrist_B.STL
 include dexsuite/models/grippers/sharpa/assets/right_meshes/wrist_collision.STL
+include dexsuite/models/grippers/sharpa/assets/right_sharpa_fardexbot.xml
 include dexsuite/models/grippers/sharpa/assets/right_sharpa_wave_with_flange.xml
 include dexsuite/models/grippers/umi/assets/aloha_flat_pad.obj
 include dexsuite/models/grippers/umi/assets/gripper.mtl

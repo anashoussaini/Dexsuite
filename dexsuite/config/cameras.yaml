@@ -74,6 +74,13 @@ dynamic:
         fov: 57.3
         res: [224, 224]
         near: 0.005
+      # sharpa_fardexbot: same optical pose; here the mount plate and the D405 body are real collidable geometry.
+      sharpa_fardexbot:
+        pos_offset: [0.073, 0.009, -0.0102]
+        quat_offset: [0.0, 0.7071068, -0.7071068, 0.0]
+        fov: 57.3
+        res: [224, 224]
+        near: 0.005
       allegro:
         pos_offset: [0.0, 0.0, -0.21]
         quat_offset: [-0.1830127, -0.6830127, 0.6830127, 0.1830127]

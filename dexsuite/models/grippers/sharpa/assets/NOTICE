@@ -2,6 +2,10 @@ Sharpa Wave hand models from Sharpa's sharpa-vision-retargeting-sdk
 (https://github.com/sharpa-robotics/sharpa-vision-retargeting-sdk, sharpa-urdf-usd-xml/wave_01),
 Copyright 2026 Sharpa Group, licensed under the Apache License 2.0 (LICENSE in this folder).
 
-The meshes in left_meshes/ and right_meshes/ are unmodified. The DexSuite authors modified
+The Sharpa meshes in left_meshes/ and right_meshes/ are unmodified. The DexSuite authors modified
 left_sharpa_wave_with_flange.urdf, left_sharpa_wave_with_flange.xml, right_sharpa_wave_with_flange.urdf and
 right_sharpa_wave_with_flange.xml for use in DexSuite.
+
+right_sharpa_fardexbot.xml is right_sharpa_wave_with_flange.xml plus the wrist-camera mount of the DexSuite
+authors' handheld rig (right_meshes/fardexbox_mount_plate.STL, fardexbox_quick_changer.STL and the D405 camera body
+fardexbox_d405.STL), added by the DexSuite authors.
