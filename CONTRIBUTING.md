@@ -8,7 +8,8 @@ Thanks for helping. New tasks, robots, devices and fixes are all welcome.
 git clone https://github.com/anashoussaini/Dexsuite.git
 cd Dexsuite
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[all]" pytest ruff
+pip install -e ".[all,il]" pytest ruff roboticstoolbox-python "skrl>=1.4,<2"
+python -m scripts.imitation_learning.robomimic.install   # robomimic 0.5.0, for the imitation learning tests
 ```
 
 On a machine without a display, `export PYOPENGL_PLATFORM=egl` before running anything that renders.

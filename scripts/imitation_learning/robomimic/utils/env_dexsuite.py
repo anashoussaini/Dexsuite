@@ -122,10 +122,14 @@ def _cams(d: dict) -> CamerasOptions:
 
 def _extract_env_options(blob: dict) -> tuple[SimOptions, RobotOptions, CamerasOptions]:
     opts = blob.get("options", blob)
+    s = opts["sim"]
     sim = SimOptions(
-        control_hz=int(opts["sim"]["control_hz"]),
-        performance_mode=bool(opts["sim"]["performance_mode"]),
-        n_envs=int(opts["sim"]["n_envs"]),
+        control_hz=int(s["control_hz"]),
+        performance_mode=bool(s["performance_mode"]),
+        n_envs=int(s["n_envs"]),
+        # rollouts run the physics the demonstrations were recorded with (some sets use 8 substeps, the default 2)
+        physics_substeps=int(s["physics_substeps"]) if s.get("physics_substeps") is not None else None,
+        precision=str(s.get("precision", "32")),
     )
     r = opts["robot"]
     robot = RobotOptions(

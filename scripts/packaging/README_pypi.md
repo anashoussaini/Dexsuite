@@ -26,16 +26,17 @@ any hand, from a parallel-jaw gripper to a 24-joint hand.
 ## Install
 
 ```bash
-pip install dexsuite                # every arm, hand and task
+pip install dexsuite                # every arm and hand, every task but Close Window and Spray (clone the repo for it)
 pip install "dexsuite[all]"         # plus SpaceMouse, Vive and Manus teleoperation and the LeRobot dataset tools
 ```
 
-Python 3.10 or newer and a CUDA GPU (the CPU works for a quick look). The first environment on a machine compiles the
+Python 3.10 to 3.13 and a CUDA GPU (the CPU works for a quick look). On Linux, pip builds `evdev` for the keyboard
+backend: install a C compiler and the Python headers first (`sudo apt install build-essential python3-dev`). The first environment on a machine compiles the
 Genesis kernels, which takes about a minute. On a machine without a display, `export PYOPENGL_PLATFORM=egl`.
 
 | | |
 |---|---|
-| Tasks | Reach, Lift, Push, Pick & Place, Stack, Rack Mug, Move Pan, Drill to Point, Place Fruits, Make Coffee, Tool Hang, Spray Graffiti, Toast Bread and the bimanual set |
+| Tasks | 31: Reach, Lift, Push, Pick & Place, Stack, Rack Mug, Move Pan, Drill to Point, Place Fruits, Spray Graffiti, Toast Bread, Make Coffee, Tool Hang, Duck in Bowl, Open Safe, Stow in Safe, Pliers in Jewelry Box, Move Pan to Platform, Close Window and Spray and the twelve bimanual tasks |
 | Arms | Franka Panda, Franka FR3, Kinova Gen3, KUKA iiwa 14, Rethink Sawyer, UR5e, UR10e, UFactory Lite 6, Link6, Unitree Z1, six integrated robots and a floating wrist for hand-only tasks |
 | End-effectors | Robotiq 2F-85, UMI gripper, Allegro Hand, BarrettHand, D'Claw, Inspire, Ability, Schunk SVH, LEAP and Shadow hands, and the Sharpa Wave hand on the floating wrist |
 | `[all]` | SpaceMouse, Vive and Manus teleoperation, LeRobot recording (0.4.4), HDF5 export |

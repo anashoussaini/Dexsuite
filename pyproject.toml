@@ -9,11 +9,15 @@ description = "DexSuite: one framework for dexterous manipulation across arms, h
 readme = "scripts/packaging/README_pypi.md"
 license = "MIT"
 license-files = ["LICENSE", "THIRD_PARTY_LICENSES.md"]
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.14"   # genesis-world 0.4.3 supports 3.10 to 3.13
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
@@ -52,7 +56,29 @@ devices = [
     "pyzmq",
     "websockets",
 ]
+# imitation learning (scripts/imitation_learning/robomimic, from a clone): robomimic 0.5.0's runtime dependencies at
+# versions that keep LeRobot working; robomimic itself comes from GitHub with
+# `python -m scripts.imitation_learning.robomimic.install` (PyPI only has 0.3.0)
+il = [
+    "dexsuite[datasets]",
+    "torchvision",
+    "psutil",
+    "tqdm",
+    "termcolor",
+    "tensorboard",
+    "tensorboardX",
+    "imageio",
+    "imageio-ffmpeg",
+    "matplotlib",
+    "transformers",
+    "diffusers",
+]
 all = ["dexsuite[datasets,devices]"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]   # tests import `scripts.*`, which is not part of the installed package
+markers = ["slow: builds environments for every robot"]
 
 [tool.setuptools]
 include-package-data = true

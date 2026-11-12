@@ -1,25 +1,54 @@
 # DexSuite robomimic Training
 
 Use `train.py` as the single entrypoint for dataset download, LeRobot to HDF5
-conversion, robomimic config generation, training, and optional rollouts.
+conversion, robomimic config generation, training, and optional rollouts. Run
+every command from the repository root.
+
+## Install
+
+The training scripts live in the repository, so install from a clone:
 
 ```bash
-python scripts/imitation_learning/robomimic/train.py \
-  --dataset lift_auto \
-  --config bc \
-  --sensors state \
-  --architecture rnn
+git clone https://github.com/anashoussaini/Dexsuite && cd Dexsuite
+pip install -e ".[il]"
+python -m scripts.imitation_learning.robomimic.install
 ```
 
-## Required Choices
+The second line brings LeRobot and robomimic's runtime dependencies. The third
+installs robomimic 0.5.0 from its GitHub tag without robomimic's own version
+pins, which would break LeRobot (PyPI only has robomimic 0.3.0, which these
+recipes do not run on). It works in pip and uv environments. The first import of
+robomimic 0.5.0 downloads a 1.6 GB CLIP model into `$HF_HOME`.
 
-`--dataset` selects what to train on. It can be a name from
-`config/datasets.yaml`, a Hugging Face dataset repo, a local LeRobot folder, or
-a converted `.hdf5` file.
+Then train, for example BC on the human demonstrations of Lift with the Allegro
+hand:
 
-`--config` selects the policy recipe. Use `bc` for behavior cloning, `act` or
-`act_img` for Action Chunking Transformer, or `diffusion` for diffusion policy.
-The recipe is not tied to cameras or low dimensional inputs.
+```bash
+python -m scripts.imitation_learning.robomimic.train \
+  --dataset lift_franka_allegro \
+  --config bc \
+  --sensors state
+```
+
+## Datasets
+
+`--dataset` selects what to train on:
+
+- A name from `config/datasets.yaml`: every set on
+  [huggingface.co/dexsuite](https://huggingface.co/dexsuite) is registered. That's
+  the 16 benchmark pairs (`reach_franka_robotiq`, `lift_franka_allegro`,
+  `spray_graffiti_floating_sharpa_scripted`, ...), their machine-generated
+  `_mg` sets, and the scripted controller sets. `--list-datasets` prints them.
+- Any Hugging Face dataset repo id in the DexSuite LeRobot format, e.g.
+  `--dataset someone/my_lift_demos`. The run is named after the repo, and the
+  task is read from the dataset's `meta/env_config.json` (or pass `--task`).
+- A local LeRobot folder recorded with DexSuite.
+- A converted `.hdf5` file.
+
+`--config` selects the policy recipe: `bc` for behavior cloning (`gmm_best`,
+`gaussian_best`, `bc_rnn` and `bc_transformer` are the tuned BC variants),
+`act` or `act_img` for Action Chunking Transformer, or `diffusion` for diffusion
+policy. The recipe is not tied to cameras or low dimensional inputs.
 
 ## Policy Shape
 
@@ -28,6 +57,10 @@ The recipe is not tied to cameras or low dimensional inputs.
 - `state` uses the task low-dimensional observation profile.
 - `proprio` uses robot-obtainable low-dimensional keys only.
 - `cameras` uses selected camera images plus robot proprio by default.
+
+Without `--sensors`, the dataset entry's `default_sensors` decides. That is
+`state` for the registered sets and for any repo id or folder outside the
+registry.
 
 `--architecture` selects the BC model family:
 
@@ -89,6 +122,8 @@ local smoke tests.
 - `--prepare-only`, download, convert, and write config without training.
 - `--force-download`, refresh the LeRobot dataset.
 - `--force-convert`, rebuild the HDF5 file.
+- `--read-workers N`, parallel readers for the conversion (default 1 when camera
+  videos are decoded, since the video decoder is not thread safe, 8 otherwise).
 - `--action-normalization dataset|none|min_max|gaussian`, override metadata.
 - `--output-dir PATH`, write robomimic runs somewhere else.
 - `--list-datasets`, show configured dataset names.
@@ -122,11 +157,11 @@ python -m scripts.imitation_learning.robomimic.train \
   --list-datasets
 ```
 
-Prepare the low-dimensional `lift_auto` HDF5 and robomimic config:
+Prepare the low-dimensional `lift_franka_allegro` HDF5 and robomimic config:
 
 ```bash
 python -m scripts.imitation_learning.robomimic.train \
-  --dataset lift_auto \
+  --dataset lift_franka_allegro \
   --config bc \
   --sensors state \
   --architecture mlp \
@@ -139,12 +174,12 @@ model checkpoint writes:
 
 ```bash
 python -m scripts.imitation_learning.robomimic.train \
-  --dataset lift_auto \
+  --dataset lift_franka_allegro \
   --config bc \
   --sensors state \
   --architecture mlp \
   --rollout standard \
-  --name lift_auto_bc_lowdim \
+  --name lift_franka_allegro_bc_lowdim \
   --output-dir ../bc_trained_models \
   --num-epochs 200 \
   --batch-size 100 \
@@ -170,7 +205,7 @@ low-dimensional only:
 
 ```bash
 python -m scripts.imitation_learning.robomimic.train \
-  --dataset lift_auto \
+  --dataset lift_franka_allegro \
   --config bc \
   --sensors cameras \
   --cameras front wrist \
@@ -184,7 +219,7 @@ Train camera BC with front and wrist cameras:
 
 ```bash
 python -m scripts.imitation_learning.robomimic.train \
-  --dataset lift_auto \
+  --dataset lift_franka_allegro \
   --config bc \
   --sensors cameras \
   --cameras front wrist \
@@ -198,7 +233,7 @@ Train ACT on robot proprio:
 
 ```bash
 python -m scripts.imitation_learning.robomimic.train \
-  --dataset lift_auto \
+  --dataset lift_franka_allegro \
   --config act \
   --sensors proprio \
   --action-horizon 8 \

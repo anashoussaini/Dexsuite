@@ -63,16 +63,37 @@ def test_dataset_arg_can_select_registry_alias():
 
 def test_dataset_arg_can_use_direct_huggingface_repo_id():
     args = _args(
-        dataset="Helium-bre/pick_place_pan_franka_allegro",
+        dataset="someone/pick_place_pan_franka_allegro",
         sensors="state",
     )
     preset = train._load_policy_preset(args)
 
     spec = train._spec_from_args(args, preset)
 
-    assert spec.name == "Helium-bre/pick_place_pan_franka_allegro"
-    assert spec.repo_id == "Helium-bre/pick_place_pan_franka_allegro"
+    # the run is named after the repo, without the slash that would break every path built from it
+    assert spec.name == "pick_place_pan_franka_allegro"
+    assert spec.repo_id == "someone/pick_place_pan_franka_allegro"
     assert spec.obs_profile == "lowdim"
+
+
+def test_dataset_arg_can_use_a_local_lerobot_folder(tmp_path):
+    root = tmp_path / "my_sets" / "lift_demos"
+    root.mkdir(parents=True)
+    args = _args(dataset=str(root))
+
+    spec = train._spec_from_args(args, train._load_policy_preset(args))
+
+    assert spec.name == "lift_demos"
+    assert spec.repo_id == str(root)
+
+
+def test_registry_default_sensors_apply_when_sensors_is_omitted():
+    args = _args(dataset="lift_franka_allegro")
+    spec = train._spec_from_args(args, train._load_policy_preset(args))
+
+    # default_sensors: state means the task's state profile, not every low-dim key (previous actions, torques)
+    assert spec.default_sensors == "state"
+    assert train._low_dim_selection_from_sensors(args, spec.obs_profile, spec.default_sensors) == "state"
 
 
 def test_lift_auto_alias_selects_camera_dataset_defaults():
@@ -276,3 +297,42 @@ def test_dataloader_cpu_generator_patch_handles_cuda_default_device():
 
     assert generator.device.type == "cpu"
     assert batch[0].tolist() == [0, 1]
+
+
+class _Cfg(SimpleNamespace):
+    def values_unlocked(self):
+        import contextlib
+
+        return contextlib.nullcontext()
+
+
+def _bc_config(gmm_enabled):
+    return _Cfg(
+        algo_name="bc",
+        train=SimpleNamespace(seq_length=1, frame_stack=1),
+        algo=SimpleNamespace(
+            rnn=SimpleNamespace(enabled=False, horizon=10),
+            transformer=SimpleNamespace(enabled=False, context_length=10),
+            gmm=SimpleNamespace(enabled=gmm_enabled),
+            actor_layer_dims=[512, 512],
+        ),
+    )
+
+
+def test_tuned_bc_presets_keep_their_architecture():
+    config = _bc_config(gmm_enabled=True)
+
+    train._apply_bc_architecture(config, _args(config="gmm_best", policy_preset="gmm_best"))
+
+    assert config.algo.gmm.enabled is True  # gmm_best trains a GMM, not a plain MLP
+    assert config.algo.actor_layer_dims == [512, 512]
+
+
+def test_plain_bc_recipe_defaults_to_mlp_and_architecture_flag_wins():
+    config = _bc_config(gmm_enabled=True)
+    train._apply_bc_architecture(config, _args(config="bc", policy_preset="bc"))
+    assert config.algo.gmm.enabled is False and config.algo.actor_layer_dims == [1024, 1024]
+
+    config = _bc_config(gmm_enabled=False)
+    train._apply_bc_architecture(config, _args(config="gmm_best", policy_preset="gmm_best", architecture="rnn"))
+    assert config.algo.rnn.enabled is True and config.train.seq_length == 10

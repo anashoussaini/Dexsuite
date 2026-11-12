@@ -4,16 +4,31 @@ from types import SimpleNamespace
 
 from scripts.imitation_learning.robomimic.utils import config_store
 
+BENCHMARK_PAIRS = [  # the 14 human-demonstration pairs of the benchmark (Spray and Toast, the other two, are scripted)
+    "reach_franka_robotiq", "reach_franka_allegro",
+    "lift_franka_franka_umi_tacticle", "lift_franka_allegro",
+    "push_franka_franka_umi_tacticle", "push_franka_allegro",
+    "pick_place_franka_franka_umi_tacticle", "pick_place_franka_allegro",
+    "stack_franka_franka_umi_tacticle", "stack_franka_allegro",
+    "pick_place_mug_franka_allegro", "pick_place_pan_franka_allegro",
+    "drill_to_point_franka_allegro", "pick_place_fruit_franka_allegro",
+]
 
-def test_dataset_registry_contains_integrated_dexsuite_datasets():
+
+def test_dataset_registry_contains_every_dexsuite_dataset():
     registry = config_store.load_dataset_registry()
 
-    assert list(registry) == [
-        "reach_franka_robotiq",
-        "pick_and_place_auto",
-        "lift_auto",
-        "pick_place_pan_franka_allegro",
-    ]
+    expected = (
+        BENCHMARK_PAIRS
+        + [name + "_mg" for name in BENCHMARK_PAIRS]
+        + [f"{task}_franka_franka_umi_tacticle_scripted" for task in ("lift", "push", "pick_place", "stack", "reach")]
+        + [f"{task}_floating_sharpa_scripted" for task in ("spray_graffiti", "put_bread_toaster", "close_window_spray")]
+        + ["lift_auto", "pick_and_place_auto"]
+    )
+    assert sorted(registry) == sorted(expected)
+    for name, spec in registry.items():
+        assert spec["repo_id"] == f"dexsuite/{name}"
+        assert spec["task"] and spec["h5_basename"] == name
 
 
 def test_dataset_registry_contains_lift_auto_camera_dataset():

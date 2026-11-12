@@ -1,3 +1,8 @@
+# Datasets train.py knows by name: python -m scripts.imitation_learning.robomimic.train --dataset <name> ...
+# Every dexsuite set on huggingface.co/dexsuite. Any other Hugging Face repo id or local LeRobot folder also works
+# as --dataset (its task is read from the dataset; pass --task to override).
+
+# Track 1, human teleoperation (50 demonstrations per pair; reach_franka_robotiq has 51)
 reach_franka_robotiq:
   repo_id: dexsuite/reach_franka_robotiq
   task: reach
@@ -6,11 +11,287 @@ reach_franka_robotiq:
   action_normalization: dataset
   no_images: true
 
-pick_and_place_auto:
-  repo_id: dexsuite/pick_and_place_auto
+reach_franka_allegro:
+  repo_id: dexsuite/reach_franka_allegro
+  task: reach
+  default_sensors: state
+  h5_basename: reach_franka_allegro
+  action_normalization: dataset
+  no_images: true
+
+lift_franka_franka_umi_tacticle:
+  repo_id: dexsuite/lift_franka_franka_umi_tacticle
+  task: lift
+  default_sensors: state
+  h5_basename: lift_franka_franka_umi_tacticle
+  action_normalization: dataset
+  no_images: true
+
+lift_franka_allegro:
+  repo_id: dexsuite/lift_franka_allegro
+  task: lift
+  default_sensors: state
+  h5_basename: lift_franka_allegro
+  action_normalization: dataset
+  no_images: true
+
+push_franka_franka_umi_tacticle:
+  repo_id: dexsuite/push_franka_franka_umi_tacticle
+  task: push
+  default_sensors: state
+  h5_basename: push_franka_franka_umi_tacticle
+  action_normalization: dataset
+  no_images: true
+
+push_franka_allegro:
+  repo_id: dexsuite/push_franka_allegro
+  task: push
+  default_sensors: state
+  h5_basename: push_franka_allegro
+  action_normalization: dataset
+  no_images: true
+
+pick_place_franka_franka_umi_tacticle:
+  repo_id: dexsuite/pick_place_franka_franka_umi_tacticle
   task: pick_place
   default_sensors: state
-  h5_basename: pick_and_place_auto
+  h5_basename: pick_place_franka_franka_umi_tacticle
+  action_normalization: dataset
+  no_images: true
+
+pick_place_franka_allegro:
+  repo_id: dexsuite/pick_place_franka_allegro
+  task: pick_place
+  default_sensors: state
+  h5_basename: pick_place_franka_allegro
+  action_normalization: dataset
+  no_images: true
+
+stack_franka_franka_umi_tacticle:
+  repo_id: dexsuite/stack_franka_franka_umi_tacticle
+  task: stack
+  default_sensors: state
+  h5_basename: stack_franka_franka_umi_tacticle
+  action_normalization: dataset
+  no_images: true
+
+stack_franka_allegro:
+  repo_id: dexsuite/stack_franka_allegro
+  task: stack
+  default_sensors: state
+  h5_basename: stack_franka_allegro
+  action_normalization: dataset
+  no_images: true
+
+# Track 2, human teleoperation (Allegro hand)
+pick_place_mug_franka_allegro:
+  repo_id: dexsuite/pick_place_mug_franka_allegro
+  task: pick_place_mug
+  default_sensors: state
+  h5_basename: pick_place_mug_franka_allegro
+  action_normalization: dataset
+  no_images: true
+
+pick_place_pan_franka_allegro:
+  repo_id: dexsuite/pick_place_pan_franka_allegro
+  task: pick_place_pan
+  default_sensors: state
+  h5_basename: pick_place_pan_franka_allegro
+  action_normalization: dataset
+  no_images: true
+
+drill_to_point_franka_allegro:
+  repo_id: dexsuite/drill_to_point_franka_allegro
+  task: drill_to_point
+  default_sensors: state
+  h5_basename: drill_to_point_franka_allegro
+  action_normalization: dataset
+  no_images: true
+
+pick_place_fruit_franka_allegro:
+  repo_id: dexsuite/pick_place_fruit_franka_allegro
+  task: pick_place_fruit
+  default_sensors: state
+  h5_basename: pick_place_fruit_franka_allegro
+  action_normalization: dataset
+  no_images: true
+
+# Machine-generated from the human demonstrations (200 per pair)
+reach_franka_robotiq_mg:
+  repo_id: dexsuite/reach_franka_robotiq_mg
+  task: reach
+  default_sensors: state
+  h5_basename: reach_franka_robotiq_mg
+  action_normalization: dataset
+  no_images: true
+
+reach_franka_allegro_mg:
+  repo_id: dexsuite/reach_franka_allegro_mg
+  task: reach
+  default_sensors: state
+  h5_basename: reach_franka_allegro_mg
+  action_normalization: dataset
+  no_images: true
+
+lift_franka_franka_umi_tacticle_mg:
+  repo_id: dexsuite/lift_franka_franka_umi_tacticle_mg
+  task: lift
+  default_sensors: state
+  h5_basename: lift_franka_franka_umi_tacticle_mg
+  action_normalization: dataset
+  no_images: true
+
+lift_franka_allegro_mg:
+  repo_id: dexsuite/lift_franka_allegro_mg
+  task: lift
+  default_sensors: state
+  h5_basename: lift_franka_allegro_mg
+  action_normalization: dataset
+  no_images: true
+
+push_franka_franka_umi_tacticle_mg:
+  repo_id: dexsuite/push_franka_franka_umi_tacticle_mg
+  task: push
+  default_sensors: state
+  h5_basename: push_franka_franka_umi_tacticle_mg
+  action_normalization: dataset
+  no_images: true
+
+push_franka_allegro_mg:
+  repo_id: dexsuite/push_franka_allegro_mg
+  task: push
+  default_sensors: state
+  h5_basename: push_franka_allegro_mg
+  action_normalization: dataset
+  no_images: true
+
+pick_place_franka_franka_umi_tacticle_mg:
+  repo_id: dexsuite/pick_place_franka_franka_umi_tacticle_mg
+  task: pick_place
+  default_sensors: state
+  h5_basename: pick_place_franka_franka_umi_tacticle_mg
+  action_normalization: dataset
+  no_images: true
+
+pick_place_franka_allegro_mg:
+  repo_id: dexsuite/pick_place_franka_allegro_mg
+  task: pick_place
+  default_sensors: state
+  h5_basename: pick_place_franka_allegro_mg
+  action_normalization: dataset
+  no_images: true
+
+stack_franka_franka_umi_tacticle_mg:
+  repo_id: dexsuite/stack_franka_franka_umi_tacticle_mg
+  task: stack
+  default_sensors: state
+  h5_basename: stack_franka_franka_umi_tacticle_mg
+  action_normalization: dataset
+  no_images: true
+
+stack_franka_allegro_mg:
+  repo_id: dexsuite/stack_franka_allegro_mg
+  task: stack
+  default_sensors: state
+  h5_basename: stack_franka_allegro_mg
+  action_normalization: dataset
+  no_images: true
+
+pick_place_mug_franka_allegro_mg:
+  repo_id: dexsuite/pick_place_mug_franka_allegro_mg
+  task: pick_place_mug
+  default_sensors: state
+  h5_basename: pick_place_mug_franka_allegro_mg
+  action_normalization: dataset
+  no_images: true
+
+pick_place_pan_franka_allegro_mg:
+  repo_id: dexsuite/pick_place_pan_franka_allegro_mg
+  task: pick_place_pan
+  default_sensors: state
+  h5_basename: pick_place_pan_franka_allegro_mg
+  action_normalization: dataset
+  no_images: true
+
+drill_to_point_franka_allegro_mg:
+  repo_id: dexsuite/drill_to_point_franka_allegro_mg
+  task: drill_to_point
+  default_sensors: state
+  h5_basename: drill_to_point_franka_allegro_mg
+  action_normalization: dataset
+  no_images: true
+
+pick_place_fruit_franka_allegro_mg:
+  repo_id: dexsuite/pick_place_fruit_franka_allegro_mg
+  task: pick_place_fruit
+  default_sensors: state
+  h5_basename: pick_place_fruit_franka_allegro_mg
+  action_normalization: dataset
+  no_images: true
+
+# Task controllers (200 per pair): the UMI gripper on Track 1, the floating Sharpa hand on Track 2
+lift_franka_franka_umi_tacticle_scripted:
+  repo_id: dexsuite/lift_franka_franka_umi_tacticle_scripted
+  task: lift
+  default_sensors: state
+  h5_basename: lift_franka_franka_umi_tacticle_scripted
+  action_normalization: dataset
+  no_images: true
+
+push_franka_franka_umi_tacticle_scripted:
+  repo_id: dexsuite/push_franka_franka_umi_tacticle_scripted
+  task: push
+  default_sensors: state
+  h5_basename: push_franka_franka_umi_tacticle_scripted
+  action_normalization: dataset
+  no_images: true
+
+pick_place_franka_franka_umi_tacticle_scripted:
+  repo_id: dexsuite/pick_place_franka_franka_umi_tacticle_scripted
+  task: pick_place
+  default_sensors: state
+  h5_basename: pick_place_franka_franka_umi_tacticle_scripted
+  action_normalization: dataset
+  no_images: true
+
+stack_franka_franka_umi_tacticle_scripted:
+  repo_id: dexsuite/stack_franka_franka_umi_tacticle_scripted
+  task: stack
+  default_sensors: state
+  h5_basename: stack_franka_franka_umi_tacticle_scripted
+  action_normalization: dataset
+  no_images: true
+
+spray_graffiti_floating_sharpa_scripted:
+  repo_id: dexsuite/spray_graffiti_floating_sharpa_scripted
+  task: spray_graffiti
+  default_sensors: state
+  h5_basename: spray_graffiti_floating_sharpa_scripted
+  action_normalization: dataset
+  no_images: true
+
+put_bread_toaster_floating_sharpa_scripted:
+  repo_id: dexsuite/put_bread_toaster_floating_sharpa_scripted
+  task: put_bread_toaster
+  default_sensors: state
+  h5_basename: put_bread_toaster_floating_sharpa_scripted
+  action_normalization: dataset
+  no_images: true
+
+# Outside the benchmark
+close_window_spray_floating_sharpa_scripted:
+  repo_id: dexsuite/close_window_spray_floating_sharpa_scripted
+  task: close_window_spray
+  default_sensors: state
+  h5_basename: close_window_spray_floating_sharpa_scripted
+  action_normalization: dataset
+  no_images: true
+
+reach_franka_franka_umi_tacticle_scripted:
+  repo_id: dexsuite/reach_franka_franka_umi_tacticle_scripted
+  task: reach
+  default_sensors: state
+  h5_basename: reach_franka_franka_umi_tacticle_scripted
   action_normalization: dataset
   no_images: true
 
@@ -22,10 +303,10 @@ lift_auto:
   action_normalization: dataset
   no_images: true
 
-pick_place_pan_franka_allegro:
-  repo_id: dexsuite/pick_place_pan_franka_allegro
-  task: pick_place_pan
+pick_and_place_auto:
+  repo_id: dexsuite/pick_and_place_auto
+  task: pick_place
   default_sensors: state
-  h5_basename: pick_place_pan_franka_allegro
+  h5_basename: pick_and_place_auto
   action_normalization: dataset
   no_images: true

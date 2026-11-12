@@ -31,9 +31,25 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import robomimic.utils.torch_utils as TorchUtils
-from huggingface_hub import snapshot_download
-from robomimic.config import config_factory
+
+def _require_robomimic() -> None:
+    """robomimic 0.5.0 is needed and is not on PyPI: say how to get it instead of failing deep in an import."""
+    import importlib.metadata
+
+    how = 'pip install -e ".[il]" && python -m scripts.imitation_learning.robomimic.install'
+    try:
+        version = importlib.metadata.version("robomimic")
+    except importlib.metadata.PackageNotFoundError:
+        raise SystemExit(f"robomimic is not installed. From the repository root: {how}") from None
+    if not version.startswith("0.5."):
+        raise SystemExit(f"robomimic {version} is installed; these recipes need 0.5.0 (PyPI only has 0.3.0): {how}")
+
+
+_require_robomimic()
+
+import robomimic.utils.torch_utils as TorchUtils  # noqa: E402
+from huggingface_hub import snapshot_download  # noqa: E402
+from robomimic.config import config_factory  # noqa: E402
 
 
 try:
@@ -74,6 +90,7 @@ class DatasetSpec:
     action_normalization: str = "dataset"
     revision: str | None = None
     no_images: bool | None = None
+    default_sensors: str | None = None
 
 
 @dataclass(frozen=True)
@@ -434,10 +451,12 @@ def _obs_profile_from_sensors(value: Any) -> str | None:
 def _low_dim_selection_from_sensors(
     args: argparse.Namespace,
     obs_profile: str | None,
+    default_sensors: str | None = None,
 ) -> str:
-    if args.sensors in {"proprio", "cameras"}:
+    sensors = args.sensors or default_sensors  # --sensors, else the dataset entry's default_sensors
+    if sensors in {"proprio", "cameras"}:
         return "proprio"
-    if args.sensors == "state":
+    if sensors == "state":
         return "state"
     if obs_profile == "cameras":
         return "proprio"
@@ -556,8 +575,13 @@ def _spec_from_args(
                 "Pass a dataset alias, HDF5 path, Hugging Face repo id, local "
                 "LeRobot root, or set --repo-id."
             )
+    if not raw:  # a repo id or folder outside the registry trains on state, like every registered set
+        raw = {"default_sensors": "state"}
 
-    name = dataset_selector or _safe_name(repo_id)
+    if dataset_selector is not None and dataset_selector in _dataset_registry():
+        name = dataset_selector
+    else:  # a repo id ("dexsuite/lift_franka_allegro") or a local folder: its last path part, made file-safe
+        name = _safe_name(Path(str(repo_id or dataset_selector).rstrip("/")).name)
     return DatasetSpec(
         name=name,
         repo_id=repo_id or raw.get("repo_id"),
@@ -571,6 +595,7 @@ def _spec_from_args(
         or str(raw.get("action_normalization", "dataset")),
         revision=args.revision or raw.get("revision"),
         no_images=_resolve_no_images(args, raw, policy_preset),
+        default_sensors=raw.get("default_sensors"),
     )
 
 
@@ -706,11 +731,13 @@ def prepare_dataset_from_registry(
 
     h5_basename = spec.h5_basename or _repo_short_name(spec.repo_id or spec.name)
     hdf5_path = hdf5_dir / f"{h5_basename}.hdf5"
-    needs_visual_reconvert = (
-        spec.obs_profile == "cameras"
-        and hdf5_path.is_file()
-        and not hdf5_has_visual_observations(hdf5_path)
-    )
+    if args.force_convert or not hdf5_path.is_file():
+        needs_visual_reconvert = False
+    else:
+        try:
+            needs_visual_reconvert = spec.obs_profile == "cameras" and not hdf5_has_visual_observations(hdf5_path)
+        except OSError:  # unreadable (an interrupted older conversion): convert again
+            needs_visual_reconvert = True
     if args.force_convert or not hdf5_path.is_file() or needs_visual_reconvert:
         compression = None if args.compression == "none" else args.compression
         _converter_module().convert_lerobot_to_hdf5(
@@ -720,7 +747,7 @@ def prepare_dataset_from_registry(
             h5_basename=h5_basename,
             video_backend=args.video_backend,
             allow_fallback=args.allow_fallback,
-            read_workers=args.read_workers,
+            read_workers=args.read_workers or (1 if spec.obs_profile == "cameras" else 8),
             block_size=args.block_size,
             compression=compression,
             compression_opts=args.compression_opts if compression else None,
@@ -744,7 +771,7 @@ def prepare_dataset_from_registry(
         camera_names=_camera_names_for_profile(
             args, spec.camera_names, spec.obs_profile
         ),
-        low_dim_selection=_low_dim_selection_from_sensors(args, spec.obs_profile),
+        low_dim_selection=_low_dim_selection_from_sensors(args, spec.obs_profile, spec.default_sensors),
         task=task,
     )
     return PreparedDataset(
@@ -862,8 +889,11 @@ def _apply_bc_architecture(config, args: argparse.Namespace) -> None:
         args.architecture
         or _legacy_architecture_name(args.config)
         or _legacy_architecture_name(args.policy_preset)
-        or "mlp"
     )
+    if architecture is None:
+        if Path(str(args.config or "bc")).stem != "bc":
+            return  # a tuned preset (gmm_best, gaussian_best, ...) already says what it trains: keep it
+        architecture = "mlp"
     with config.values_unlocked():
         config.algo.rnn.enabled = architecture == "rnn"
         config.algo.transformer.enabled = architecture == "transformer"
@@ -1374,7 +1404,13 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--no-fallback", dest="allow_fallback", action="store_false")
     parser.add_argument("--no-images", "--no_image", action="store_true")
-    parser.add_argument("--read-workers", type=int, default=8)
+    parser.add_argument(
+        "--read-workers",
+        type=int,
+        default=None,
+        help="Parallel readers for the LeRobot to HDF5 conversion. Default 1 when camera videos are decoded "
+        "(the video decoder is not thread safe), 8 otherwise.",
+    )
     parser.add_argument("--block-size", type=int, default=128)
     parser.add_argument("--compression", default="none", choices=["none", "gzip"])
     parser.add_argument("--compression-opts", type=int, default=4)

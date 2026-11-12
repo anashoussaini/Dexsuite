@@ -1046,7 +1046,10 @@ def convert_lerobot_to_hdf5(
 
             it = _iter()
 
-    with h5py.File(out_h5, "w") as f:
+    # written under a temporary name and moved into place at the end: an interrupted conversion never leaves a
+    # truncated HDF5 under the final name (nor replaces a good one)
+    tmp_h5 = out_h5.with_name(out_h5.name + ".tmp")
+    with h5py.File(tmp_h5, "w") as f:
         _write_file_attrs(
             f,
             repo_or_root=repo_or_root,
@@ -1139,6 +1142,7 @@ def convert_lerobot_to_hdf5(
         components=components,
     )
 
+    tmp_h5.replace(out_h5)  # the HDF5 appears only once it is complete
     tag = "(no-images)" if no_images else ""
     print(
         f"[convert] Wrote HDF5 {tag} -> {out_h5} | demos={num_demos} | frames={total_steps} | backend={'auto' if used_be is None else used_be}",

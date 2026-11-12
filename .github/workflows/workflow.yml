@@ -3,7 +3,7 @@ name: Publish to PyPI
 on:
   release:
     types: [published]       # publishing a GitHub release (tag v<version>) uploads that version to PyPI
-  workflow_dispatch:
+  workflow_dispatch:          # by hand: build and check only, no upload
 
 jobs:
   build-and-publish:
@@ -47,5 +47,9 @@ jobs:
 
       - name: Publish
         # PyPI Trusted Publishing (OIDC), no API token: the dexsuite project needs this repository and workflow
-        # registered as its trusted publisher on pypi.org.
+        # registered as its trusted publisher on pypi.org. Only a published release uploads: "Run workflow" by hand
+        # is a build check. skip-existing lets a re-run finish an upload that stopped between the wheel and the sdist.
+        if: github.event_name == 'release'
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true

@@ -71,6 +71,43 @@ tasks:
       - state_other_drill_tip_pos
       - state_other_target_pos
 
+  # the Sharpa hand on the floating wrist; spray_graffiti and put_bread_toaster are the paper's state profiles
+  spray_graffiti:
+    low_dim:
+      - state_manipulator_eef_pos
+      - state_gripper_tcp_pos
+      - state_gripper_qpos
+      - state_other_can_pos
+      - state_other_nozzle_pos
+      - state_other_nozzle_dir
+      - state_other_paper_pos
+      - state_other_stencil_center_xy
+      - state_other_stencil_size
+      - state_other_stencil_id
+      - state_other_stencil_coverage
+
+  put_bread_toaster:
+    low_dim:
+      - state_manipulator_eef_pos
+      - state_gripper_tcp_pos
+      - state_gripper_qpos
+      - state_other_toast_pos
+      - state_other_toaster_pos
+      - state_other_lever_q
+      - state_other_dial_q
+
+  close_window_spray:
+    low_dim:
+      - state_manipulator_eef_pos
+      - state_gripper_tcp_pos
+      - state_gripper_qpos
+      - state_other_bottle_pos
+      - state_other_nozzle_pos
+      - state_other_nozzle_dir
+      - state_other_sash_q
+      - state_other_pane_center
+      - state_other_pane_coverage
+
   bimanual_stack_mid_air:
     low_dim:
       - state_right_manipulator_eef_pos

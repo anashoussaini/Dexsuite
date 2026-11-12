@@ -14,7 +14,7 @@
 <p align="center">
   <a href="https://pypi.org/project/dexsuite/"><img alt="PyPI" src="https://img.shields.io/pypi/v/dexsuite?style=flat-square&labelColor=24292f&color=289be4"></a>
   <img alt="Status: beta" src="https://img.shields.io/badge/status-beta-e3a008?style=flat-square&labelColor=24292f">
-  <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10+-289be4?style=flat-square&labelColor=24292f">
+  <img alt="Python 3.10 to 3.13" src="https://img.shields.io/badge/python-3.10_to_3.13-289be4?style=flat-square&labelColor=24292f">
   <img alt="Genesis 0.4.3" src="https://img.shields.io/badge/simulator-Genesis_0.4.3-289be4?style=flat-square&labelColor=24292f">
   <img alt="Gymnasium API" src="https://img.shields.io/badge/API-Gymnasium-289be4?style=flat-square&labelColor=24292f">
   <a href="https://huggingface.co/dexsuite"><img alt="Datasets in LeRobot format" src="https://img.shields.io/badge/datasets-LeRobot-289be4?style=flat-square&labelColor=24292f"></a>
@@ -154,7 +154,9 @@ env.close()
 pip install dexsuite
 ```
 
-Python 3.10 or newer and a CUDA GPU; the CPU works for a quick look. This brings Genesis 0.4.3, PyTorch, Mink with its
+Python 3.10 to 3.13 (Genesis does not support 3.14 yet) and a CUDA GPU; the CPU works for a quick look. On Linux, pip
+builds `evdev` for the keyboard backend, so install a C compiler and the Python headers first
+(`sudo apt install build-essential python3-dev`). This brings Genesis 0.4.3, PyTorch, Mink with its
 QP solver and Gymnasium, with every robot and the assets of every task but one: Close Window and Spray runs from a clone,
 its window model is over PyPI's file-size limit. To change the code, or for the full object
 library, install from source:
@@ -180,7 +182,9 @@ export PYOPENGL_PLATFORM=egl
 | `pip install "dexsuite[manus]"` | a Manus glove, retargeted to the hand with [GeoRT](https://github.com/facebookresearch/GeoRT) |
 | `pip install "dexsuite[all]"` | everything above |
 
-From a clone, the same extras install with `pip install -e ".[datasets]"` and so on.
+From a clone, the same extras install with `pip install -e ".[datasets]"` and so on. Imitation learning runs from a
+clone too: `pip install -e ".[il]"`, then `python -m scripts.imitation_learning.robomimic.install` for robomimic 0.5.0
+(see [its README](scripts/imitation_learning/robomimic/README.md)).
 
 <br>
 
